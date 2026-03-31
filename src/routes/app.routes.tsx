@@ -5,18 +5,18 @@ import { Navigate } from 'react-router-dom';
 import AuthLayout from '../components/layout/AuthLayout';
 import MainLayout from '../components/layout/MainLayout';
 
-// Vistas requeridas por HU001
+// Views
 import Login from '../views/auth/Login.view';
 import Register from '../views/auth/Register.view';
 import ForgotPassword from '../views/auth/ForgotPassword.view';
 import ResetPassword from '../views/auth/ResetPassword.view';
-// Importamos también el perfil (HU001)
 import Profile from '../views/Profile.view';
+import Home from '../views/home/Home.view';
 
 export const appRoutes: RouteObject[] = [
     {
         path: '/',
-        element: <Navigate to="/login" replace />
+        element: <Navigate to="/home" replace /> // Redirect to Home in this branch
     },
     {
         path: '/login',
@@ -53,6 +53,10 @@ export const appRoutes: RouteObject[] = [
     {
         element: <MainLayout />,
         children: [
+            {
+                path: '/home',
+                element: <Home />
+            },
             {
                 path: '/profile',
                 element: <Profile />
