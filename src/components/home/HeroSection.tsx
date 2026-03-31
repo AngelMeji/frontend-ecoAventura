@@ -8,39 +8,38 @@ const HeroSection: React.FC = () => {
                 className="absolute inset-0 bg-cover bg-center"
                 style={{ backgroundImage: 'url("/assets/risaralda_hero.png")' }}
             >
-                {/* Image 2 seems to have a gentle dark overlay on the left for text readability */}
-                <div className="absolute inset-0 bg-gradient-to-r from-[#064e3b]/90 via-[#064e3b]/50 to-transparent"></div>
+                <div className="absolute inset-0 bg-gradient-to-r from-[#064e3b]/90 via-[#064e3b]/40 to-transparent"></div>
             </div>
 
             {/* Content */}
-            <div className="relative h-full flex flex-col justify-center px-8 md:px-16 max-w-3xl">
-                <p className="text-[#facc15] font-bold text-xs tracking-widest uppercase mb-3">
+            <div className="relative h-full flex flex-col justify-center px-10 md:px-20 max-w-3xl">
+                <p className="text-[#E9C46A] font-bold text-[13px] tracking-[0.15em] uppercase mb-4" style={{ fontFamily: 'Inter, sans-serif' }}>
                     DESCUBRE RISARALDA
                 </p>
                 
-                <h1 className="text-4xl md:text-[3.5rem] font-extrabold text-white mb-6 leading-[1.1] tracking-tight">
+                <h1 className="text-5xl md:text-[4.5rem] font-bold text-white leading-[1.05] tracking-tight mb-6" style={{ fontFamily: 'Outfit, sans-serif' }}>
                     Explora Paraísos <br className="hidden md:block"/>
-                    <span style={{ color: '#facc15' }}>E</span>
-                    <span style={{ color: '#a3e635' }}>c</span>
-                    <span style={{ color: '#38bdf8' }}>o</span>
-                    <span style={{ color: '#60a5fa' }}>t</span>
+                    <span style={{ color: '#E9C46A' }}>E</span>
+                    <span style={{ color: '#D4A373' }}>c</span>
+                    <span style={{ color: '#86efac' }}>o</span>
+                    <span style={{ color: '#38bdf8' }}>t</span>
                     <span style={{ color: '#818cf8' }}>u</span>
-                    <span style={{ color: '#a78bfa' }}>r</span>
-                    <span style={{ color: '#c084fc' }}>í</span>
-                    <span style={{ color: '#e879f9' }}>s</span>
-                    <span style={{ color: '#f472b6' }}>t</span>
-                    <span style={{ color: '#fb7185' }}>i</span>
-                    <span style={{ color: '#f87171' }}>c</span>
-                    <span style={{ color: '#fca5a5' }}>o</span>
-                    <span style={{ color: '#fdba74' }}>s</span>
+                    <span style={{ color: '#c084fc' }}>r</span>
+                    <span style={{ color: '#e879f9' }}>í</span>
+                    <span style={{ color: '#f472b6' }}>s</span>
+                    <span style={{ color: '#fb7185' }}>t</span>
+                    <span style={{ color: '#f87171' }}>i</span>
+                    <span style={{ color: '#fca5a5' }}>c</span>
+                    <span style={{ color: '#fdba74' }}>o</span>
+                    <span style={{ color: '#fcd34d' }}>s</span>
                 </h1>
                 
-                <p className="text-gray-200 text-base md:text-lg max-w-xl mb-8 leading-snug font-medium">
+                <p className="text-white/95 text-base md:text-[18px] max-w-2xl mb-10 leading-[1.6] font-medium" style={{ fontFamily: 'Inter, sans-serif' }}>
                     Sumérgete en la magia de la biodiversidad. Encuentra los destinos más hermosos y sostenibles para tu próxima aventura en la naturaleza.
                 </p>
 
                 <div>
-                    <button className="bg-[#facc15] hover:bg-[#eab308] text-[#422006] font-bold py-3 px-6 rounded-full inline-flex items-center gap-2 transition-all hover:scale-105 shadow-xl shadow-black/10">
+                    <button className="bg-[#E9C46A] hover:bg-[#d4b05b] text-[#1f2937] font-bold py-3.5 px-8 rounded-full inline-flex items-center gap-2 transition-all hover:-translate-y-1 shadow-lg shadow-black/20" style={{ fontFamily: 'Inter, sans-serif' }}>
                         Comenzar Aventura
                         <svg className="w-5 h-5 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M14 5l7 7m0 0l-7 7m7-7H3" /></svg>
                     </button>
