@@ -1,5 +1,6 @@
 import HeroSection from './components/home/HeroSection';
 import SearchBar from './components/home/SearchBar';
+import CategoriesGrid from './components/home/CategoriesGrid';
 
 function App() {
   const handleSearch = (query: string) => {
@@ -8,9 +9,10 @@ function App() {
 
   return (
     <div className="min-h-screen bg-eco-bg flex flex-col items-center pb-20">
-      <main className="w-full max-w-[1400px] flex flex-col items-center">
+      <main className="w-full justify-center flex flex-col items-center">
         <HeroSection />
         <SearchBar onSearch={handleSearch} />
+        <CategoriesGrid />
       </main>
     </div>
   )
