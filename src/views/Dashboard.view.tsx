@@ -7,12 +7,27 @@ import Alert from '../components/common/Alert';
 import ConfirmationModal from '../components/common/ConfirmationModal';
 import SafeImage from '../components/common/SafeImage';
 import { getOptimizedImageUrl } from '../utils/imageUtils';
+import type { Place } from '../models/Place.model';
 
 const Dashboard: React.FC = () => {
     const user = authService.getCurrentUser();
     const navigate = useNavigate();
     const [loading, setLoading] = useState(true);
     const [stats, setStats] = useState<any>(null);
+
+    const [partnerPlaces, setPartnerPlaces] = useState<Place[]>([]);
+    const [pendingPlaces, setPendingPlaces] = useState<Place[]>([]);
+    const [allPlaces, setAllPlaces] = useState<Place[]>([]);
+    const [adminPagination, setAdminPagination] = useState<{
+        currentPage: number;
+        lastPage: number;
+        total: number;
+    }>({ currentPage: 1, lastPage: 1, total: 0 });
+    const [pendingPagination, setPendingPagination] = useState<{
+        currentPage: number;
+        lastPage: number;
+        total: number;
+    }>({ currentPage: 1, lastPage: 1, total: 0 });
 
     const [alert, setAlert] = useState<{ type: 'success' | 'error' | 'warning' | 'info'; message: string } | null>(null);
     const [modal, setModal] = useState<{ title: string; message: string; onConfirm: () => void; type?: 'danger' | 'warning' | 'info' | 'success' } | null>(null);
@@ -29,8 +44,15 @@ const Dashboard: React.FC = () => {
         setLoading(true);
         try {
             if (user.role === 'admin') {
-                const dashData = await placesService.getAdminDashboard();
+                const [dashData] = await Promise.all([
+                    placesService.getAdminDashboard(),
+                    loadPendingPlaces(1),
+                    loadAdminPlaces(1)
+                ]);
                 setStats(dashData?.stats || {});
+            } else if (user.role === 'partner') {
+                const dashData = await placesService.getPartnerDashboard();
+                setPartnerPlaces(dashData?.recent_places || []);
             }
         } catch (error) {
             console.error('Error al cargar el panel:', error);
@@ -38,6 +60,66 @@ const Dashboard: React.FC = () => {
         } finally {
             setLoading(false);
         }
+    };
+
+    const loadAdminPlaces = async (page: number) => {
+        try {
+            const response = await placesService.getAdminAllPlaces(page);
+            setAllPlaces(response.data || []);
+            setAdminPagination({
+                currentPage: response.current_page,
+                lastPage: response.last_page,
+                total: response.total
+            });
+        } catch (error) {
+            console.error('Error al cargar lugares de administrador:', error);
+            setAllPlaces([]);
+        }
+    };
+
+    const loadPendingPlaces = async (page: number) => {
+        try {
+            const response = await placesService.getPendingPlaces(page);
+            setPendingPlaces(response.data || []);
+            setPendingPagination({
+                currentPage: response.current_page,
+                lastPage: response.last_page,
+                total: response.total
+            });
+        } catch (error) {
+            console.error('Error al cargar lugares pendientes:', error);
+            setPendingPlaces([]);
+        }
+    };
+
+    const statusMap: { [key: string]: string } = {
+        'pending': 'Pendiente',
+        'approved': 'Aprobado',
+        'rejected': 'Rechazado',
+        'needs_fix': 'Necesita corrección'
+    };
+
+    const handleApprove = (id: number) => {
+        setModal({
+            title: 'Aprobar Lugar',
+            message: '¿Estás seguro de que deseas aprobar este lugar?',
+            type: 'success',
+            onConfirm: async () => {
+                try {
+                    await placesService.approve(id);
+                    setAlert({ type: 'success', message: 'Lugar aprobado exitosamente' });
+                    setPendingPlaces(prev => prev.filter(p => p.id !== id));
+                    if (user.role === 'admin') {
+                        loadAdminPlaces(adminPagination.currentPage);
+                    }
+                    await loadPendingPlaces(pendingPagination.currentPage);
+                    loadDashboardData();
+                } catch (error) {
+                    setAlert({ type: 'error', message: 'Error al aprobar el lugar' });
+                }
+                setModal(null);
+            }
+        });
     };
 
     if (loading) {
@@ -110,6 +192,15 @@ const Dashboard: React.FC = () => {
                                 >
                                     Editar Perfil
                                 </button>
+                                {(user.role === 'admin' || user.role === 'partner') && (
+                                    <button
+                                        onClick={() => navigate('/admin/places/new')}
+                                        className="bg-eco-accent hover:bg-eco-accent-hover text-eco-primary-900 px-6 py-1.5 rounded-full text-sm font-bold shadow-lg shadow-black/10 transition-all hover:scale-105 flex items-center gap-2"
+                                    >
+                                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" /></svg>
+                                        Crear Lugar
+                                    </button>
+                                )}
                             </div>
                         </div>
                     </div>
@@ -163,6 +254,239 @@ const Dashboard: React.FC = () => {
                                 </div>
                             </div>
 
+                            {/* Pending Places Table */}
+                            <div id="pending" className="bg-white rounded-xl shadow-sm overflow-hidden border border-gray-100 animate-fade-in-up" style={{ animationDelay: '0.3s' }}>
+                                <div className="p-6 border-b border-gray-100 bg-yellow-50/50">
+                                    <h2 className="text-xl font-bold text-gray-800 flex items-center gap-2">
+                                        <svg className="w-5 h-5 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                                        Lugares Pendientes de Aprobación
+                                    </h2>
+                                </div>
+                                {pendingPlaces.length === 0 ? (
+                                    <div className="p-8 text-center text-gray-500">
+                                        <p>No hay lugares pendientes.</p>
+                                    </div>
+                                ) : (<>
+                                    <div className="hidden md:block overflow-x-auto">
+                                        <table className="w-full text-left">
+                                            <thead className="bg-gray-50 text-xs uppercase text-gray-500">
+                                                <tr>
+                                                    <th className="p-4">Lugar</th>
+                                                    <th className="p-4">Socio</th>
+                                                    <th className="p-4 text-right">Acciones</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody className="divide-y divide-gray-100">
+                                                {pendingPlaces.map(place => (
+                                                    <tr key={place.id} className="hover:bg-gray-50">
+                                                        <td className="p-4">
+                                                            <p className="font-bold text-gray-900">{place.name}</p>
+                                                            <p className="text-xs text-gray-500">{place.category?.name}</p>
+                                                        </td>
+                                                        <td className="p-4 text-sm text-gray-600">{place.user?.name}</td>
+                                                        <td className="p-4 text-right space-x-2 flex justify-end">
+                                                            <button
+                                                                onClick={() => handleApprove(place.id)}
+                                                                className="px-2 py-1 bg-green-100 text-green-700 rounded hover:bg-green-200 text-xs font-bold flex items-center whitespace-nowrap"
+                                                            >
+                                                                <svg className="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
+                                                                APROBAR
+                                                            </button>
+                                                            <button
+                                                                onClick={() => {
+                                                                    setModal({
+                                                                        title: 'Rechazar Lugar',
+                                                                        message: '¿Estás seguro de que deseas rechazar este lugar?',
+                                                                        type: 'danger',
+                                                                        onConfirm: async () => {
+                                                                            try {
+                                                                                await placesService.reject(place.id);
+                                                                                setAlert({ type: 'success', message: 'Lugar rechazado exitosamente' });
+                                                                                setPendingPlaces(prev => prev.filter(p => p.id !== place.id));
+                                                                                loadAdminPlaces(adminPagination.currentPage);
+                                                                                await loadPendingPlaces(pendingPagination.currentPage);
+                                                                                loadDashboardData();
+                                                                            } catch (e) {
+                                                                                setAlert({ type: 'error', message: 'Error al rechazar' });
+                                                                            }
+                                                                            setModal(null);
+                                                                        }
+                                                                    });
+                                                                }}
+                                                                className="px-2 py-1 bg-red-100 text-red-700 rounded hover:bg-red-200 text-xs font-bold flex items-center whitespace-nowrap"
+                                                            >
+                                                                <svg className="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+                                                                RECHAZAR
+                                                            </button>
+                                                            <button
+                                                                onClick={() => {
+                                                                    setModal({
+                                                                        title: 'Solicitar Cambios',
+                                                                        message: '¿El lugar requiere correcciones por parte del socio?',
+                                                                        type: 'warning',
+                                                                        onConfirm: async () => {
+                                                                            try {
+                                                                                await placesService.needsFix(place.id);
+                                                                                setAlert({ type: 'success', message: 'Cambios solicitados' });
+                                                                                setPendingPlaces(prev => prev.filter(p => p.id !== place.id));
+                                                                                loadAdminPlaces(adminPagination.currentPage);
+                                                                                await loadPendingPlaces(pendingPagination.currentPage);
+                                                                                loadDashboardData();
+                                                                            } catch (e) {
+                                                                                setAlert({ type: 'error', message: 'Error al solicitar cambios' });
+                                                                            }
+                                                                            setModal(null);
+                                                                        }
+                                                                    });
+                                                                }}
+                                                                className="px-2 py-1 bg-yellow-100 text-yellow-700 rounded hover:bg-yellow-200 text-xs font-bold flex items-center whitespace-nowrap"
+                                                            >
+                                                                <svg className="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                                                                CAMBIOS
+                                                            </button>
+                                                            <button
+                                                                onClick={() => navigate(`/place/${place.slug || place.id}`, { state: { placeData: place } })}
+                                                                className="px-2 py-1 bg-eco-primary-50 text-eco-primary-700 rounded hover:bg-eco-primary-100 text-xs font-bold transition-colors flex items-center whitespace-nowrap"
+                                                            >
+                                                                VER
+                                                            </button>
+                                                        </td>
+                                                    </tr>
+                                                ))}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                    {pendingPagination.lastPage > 1 && (
+                                        <div className="p-4 border-t border-gray-100 flex justify-between items-center text-xs">
+                                            <span>Página {pendingPagination.currentPage} de {pendingPagination.lastPage}</span>
+                                            <div className="flex gap-2">
+                                                <button onClick={() => loadPendingPlaces(pendingPagination.currentPage - 1)} disabled={pendingPagination.currentPage === 1} className="px-2 py-1 bg-gray-100 rounded disabled:opacity-50">Anterior</button>
+                                                <button onClick={() => loadPendingPlaces(pendingPagination.currentPage + 1)} disabled={pendingPagination.currentPage === pendingPagination.lastPage} className="px-2 py-1 bg-gray-100 rounded disabled:opacity-50">Siguiente</button>
+                                            </div>
+                                        </div>
+                                    )}
+                                </>)}
+                            </div>
+
+                            {/* ALL Places Table (Management) */}
+                            <div id="all-places" className="bg-white rounded-2xl shadow-sm overflow-hidden border border-gray-100 animate-fade-in-up" style={{ animationDelay: '0.4s' }}>
+                                <div className="p-6 border-b border-gray-100 bg-gray-50/50">
+                                    <h2 className="text-xl font-display font-bold text-gray-800 flex items-center gap-2">
+                                        <svg className="w-5 h-5 text-eco-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                                        Administrar Todos los Lugares
+                                    </h2>
+                                </div>
+                                <div className="hidden md:block overflow-x-auto">
+                                    <table className="w-full text-left">
+                                        <thead className="bg-gray-50/50 text-xs uppercase text-gray-500 font-bold tracking-wider">
+                                            <tr>
+                                                <th className="p-4 pl-6">Lugar</th>
+                                                <th className="p-4">Socio</th>
+                                                <th className="p-4">Estado</th>
+                                                <th className="p-4 text-right pr-6">Acciones</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody className="divide-y divide-gray-100">
+                                            {allPlaces && allPlaces.map(place => (
+                                                <tr key={place.id} className="hover:bg-gray-50">
+                                                    <td className="p-4">
+                                                        <div className="flex items-center gap-3">
+                                                            <div className="w-10 h-10 rounded bg-gray-200 overflow-hidden">
+                                                                {place.images && place.images[0] && (
+                                                                    <img src={getOptimizedImageUrl(place.images[0].image_path)} className="w-full h-full object-cover" />
+                                                                )}
+                                                            </div>
+                                                            <div>
+                                                                <p className="font-bold text-gray-900">{place.name}</p>
+                                                            </div>
+                                                        </div>
+                                                    </td>
+                                                    <td className="p-4 text-sm text-gray-600">{place.user?.name}</td>
+                                                    <td className="p-4">
+                                                        <select
+                                                            value={place.status}
+                                                            onChange={(e) => {
+                                                                const newStatus = e.target.value;
+                                                                setModal({
+                                                                    title: 'Cambiar Estado',
+                                                                    message: `¿Estás seguro de que deseas cambiar el estado a "${statusMap[newStatus] || newStatus}"?`,
+                                                                    type: 'success',
+                                                                    onConfirm: async () => {
+                                                                        try {
+                                                                            if (newStatus === 'approved') await placesService.approve(place.id);
+                                                                            else if (newStatus === 'rejected') await placesService.reject(place.id);
+                                                                            else if (newStatus === 'needs_fix') await placesService.needsFix(place.id);
+                                                                            else if (newStatus === 'pending') await placesService.setPending(place.id);
+                                                                            setAlert({ type: 'success', message: 'Estado actualizado correctamente' });
+                                                                            loadAdminPlaces(adminPagination.currentPage);
+                                                                            loadPendingPlaces(pendingPagination.currentPage);
+                                                                            loadDashboardData();
+                                                                        } catch (error) {
+                                                                            setAlert({ type: 'error', message: 'Error cambiando el estado' });
+                                                                        }
+                                                                        setModal(null);
+                                                                    }
+                                                                });
+                                                            }}
+                                                            className={`px-3 py-1.5 rounded-full text-xs font-bold border-none cursor-pointer focus:ring-2 focus:ring-offset-1 focus:ring-eco-primary-500 transition-shadow ${place.status === 'approved' ? 'bg-eco-primary-100 text-eco-primary-700' :
+                                                                place.status === 'pending' ? 'bg-yellow-100 text-yellow-700' :
+                                                                    place.status === 'needs_fix' ? 'bg-orange-100 text-orange-700' :
+                                                                        'bg-red-100 text-red-700'
+                                                                }`}
+                                                        >
+                                                            <option value="pending">Pendiente</option>
+                                                            <option value="approved">Aprobado</option>
+                                                            <option value="needs_fix">Requiere Cambios</option>
+                                                            <option value="rejected">Rechazado</option>
+                                                        </select>
+                                                    </td>
+                                                    <td className="p-4 text-right space-x-2">
+                                                        <button
+                                                            onClick={() => {
+                                                                setModal({
+                                                                    title: 'Eliminar Lugar',
+                                                                    message: '¿Estás seguro de que deseas eliminar este lugar? Esta acción no se puede deshacer.',
+                                                                    type: 'danger',
+                                                                    onConfirm: async () => {
+                                                                        try {
+                                                                            await placesService.delete(place.id);
+                                                                            setAlert({ type: 'success', message: 'Lugar eliminado correctamente' });
+                                                                            loadAdminPlaces(adminPagination.currentPage);
+                                                                            loadDashboardData();
+                                                                        } catch (e) {
+                                                                            setAlert({ type: 'error', message: 'Error eliminando lugar' });
+                                                                        }
+                                                                        setModal(null);
+                                                                    }
+                                                                });
+                                                            }}
+                                                            className="px-3 py-1 bg-red-100 text-red-700 rounded hover:bg-red-200 text-xs font-bold"
+                                                        >
+                                                            ELIMINAR
+                                                        </button>
+                                                        <button
+                                                            onClick={() => navigate(`/admin/places/${place.id}/edit`)}
+                                                            className="px-3 py-1 bg-blue-100 text-blue-700 rounded hover:bg-blue-200 text-xs font-bold"
+                                                        >
+                                                            EDITAR
+                                                        </button>
+                                                    </td>
+                                                </tr>
+                                            ))}
+                                        </tbody>
+                                    </table>
+                                </div>
+                                {adminPagination.lastPage > 1 && (
+                                    <div className="p-4 border-t border-gray-100 flex justify-between items-center text-xs">
+                                        <span>Página {adminPagination.currentPage} de {adminPagination.lastPage}</span>
+                                        <div className="flex gap-2">
+                                            <button onClick={() => loadAdminPlaces(adminPagination.currentPage - 1)} disabled={adminPagination.currentPage === 1} className="px-2 py-1 bg-gray-100 rounded disabled:opacity-50">Anterior</button>
+                                            <button onClick={() => loadAdminPlaces(adminPagination.currentPage + 1)} disabled={adminPagination.currentPage === adminPagination.lastPage} className="px-2 py-1 bg-gray-100 rounded disabled:opacity-50">Siguiente</button>
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+
                             {/* USER MANAGEMENT SECTION */}
                             <div className="bg-white rounded-2xl shadow-sm overflow-hidden border border-gray-100 animate-fade-in-up" style={{ animationDelay: '0.4s' }}>
                                 <div className="p-6 border-b border-gray-100 bg-gray-50/50">
@@ -181,6 +505,79 @@ const Dashboard: React.FC = () => {
                                 </div>
                             </div>
 
+                        </div>
+                    </div>
+                ) : user.role === 'partner' ? (
+                    <div className="space-y-8 animate-fade-in-up">
+                        <div className="bg-white rounded-2xl shadow-sm overflow-hidden border border-gray-100">
+                            <div className="p-6 border-b border-gray-100 bg-gray-50/50 flex justify-between items-center">
+                                <h2 className="text-xl font-display font-bold text-gray-800 flex items-center gap-2">
+                                    <svg className="w-5 h-5 text-eco-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 19a2 2 0 01-2-2V7a2 2 0 012-2h4l2 2h4a2 2 0 012 2v1M5 19h14a2 2 0 002-2v-5a2 2 0 00-2-2H9a2 2 0 00-2 2v5a2 2 0 01-2 2z" /></svg>
+                                    Mis Publicaciones
+                                </h2>
+                                <button
+                                    onClick={() => navigate('/admin/places/new')}
+                                    className="bg-eco-primary-600 hover:bg-eco-primary-700 text-white px-4 py-2 rounded-lg text-sm font-bold shadow-md transition-all flex items-center gap-2"
+                                >
+                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" /></svg>
+                                    Publicar Lugar
+                                </button>
+                            </div>
+                            <div className="overflow-x-auto">
+                                <table className="w-full text-left border-collapse">
+                                    <thead>
+                                        <tr className="bg-gray-50 text-gray-500 text-xs uppercase tracking-wider border-b border-gray-100">
+                                            <th className="p-4 font-semibold">Lugar</th>
+                                            <th className="p-4 font-semibold">Categoría</th>
+                                            <th className="p-4 font-semibold">Estado</th>
+                                            <th className="p-4 font-semibold">Calif.</th>
+                                            <th className="p-4 font-semibold text-right">Acciones</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody className="divide-y divide-gray-100 text-sm">
+                                        {partnerPlaces.length === 0 ? (
+                                            <tr>
+                                                <td colSpan={5} className="p-8 text-center text-gray-500 italic">
+                                                    No tienes publicaciones aún.
+                                                </td>
+                                            </tr>
+                                        ) : partnerPlaces.map(place => (
+                                            <tr key={place.id} className="hover:bg-gray-50/50 transition-colors">
+                                                <td className="p-4">
+                                                    <div className="flex items-center gap-3">
+                                                        <SafeImage
+                                                            src={place.images?.[0] ? getOptimizedImageUrl(place.images[0].full_url || place.images[0].image_path) : undefined}
+                                                            alt={place.name}
+                                                            className="w-12 h-12 rounded-lg object-cover bg-gray-100"
+                                                        />
+                                                        <span className="font-bold text-gray-800">{place.name}</span>
+                                                    </div>
+                                                </td>
+                                                <td className="p-4 text-gray-600">{place.category?.name || 'N/A'}</td>
+                                                <td className="p-4">
+                                                    <span className={`px-3 py-1 rounded-full text-xs font-bold leading-none ${place.status === 'approved' ? 'bg-green-100 text-green-700' : place.status === 'pending' ? 'bg-yellow-100 text-yellow-700' : place.status === 'rejected' ? 'bg-red-100 text-red-700' : 'bg-orange-100 text-orange-700'}`}>
+                                                        {place.status === 'approved' ? 'Aprobado' : place.status === 'pending' ? 'Pendiente' : place.status === 'rejected' ? 'Rechazado' : 'Requiere Cambios'}
+                                                    </span>
+                                                </td>
+                                                <td className="p-4">
+                                                    <div className="flex items-center gap-1">
+                                                        <svg className="w-4 h-4 text-yellow-400" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" /></svg>
+                                                        <span className="font-bold">{place.reviews_avg_rating ? Number(place.reviews_avg_rating).toFixed(1) : '-'}</span>
+                                                    </div>
+                                                </td>
+                                                <td className="p-4 text-right">
+                                                    <button
+                                                        onClick={() => navigate(`/admin/places/${place.id}/edit`)}
+                                                        className="px-3 py-1 bg-blue-100 text-blue-700 rounded hover:bg-blue-200 text-xs font-bold"
+                                                    >
+                                                        EDITAR
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            </div>
                         </div>
                     </div>
                 ) : (

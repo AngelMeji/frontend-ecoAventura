@@ -223,12 +223,12 @@ const PlaceForm: React.FC = () => {
         formData.append('short_description', shortDesc);
         formData.append('description', description);
         formData.append('category_id', categoryId);
-        if (address) formData.append('address', address);
-        if (latitude) formData.append('latitude', latitude);
-        if (longitude) formData.append('longitude', longitude);
-        if (difficulty) formData.append('difficulty', difficulty);
-        if (duration) formData.append('duration', duration);
-        if (bestSeason) formData.append('best_season', bestSeason);
+        formData.append('address', address || '');
+        formData.append('latitude', latitude || '');
+        formData.append('longitude', longitude || '');
+        formData.append('difficulty', difficulty || 'baja');
+        formData.append('duration', duration || '');
+        formData.append('best_season', bestSeason || '');
 
         // Agregar nuevas imágenes
         const newImages = imagePreviews.filter(img => !img.isExisting && img.file);

@@ -57,6 +57,7 @@ export interface Place {
 
     // Atributos calculados
     average_rating?: number;
+    reviews_avg_rating?: number;
     is_favorite?: boolean;
 
     created_at?: string;
