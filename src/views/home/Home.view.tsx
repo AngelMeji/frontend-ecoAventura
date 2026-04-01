@@ -5,6 +5,7 @@ import DestinationCard from '../../components/destination/DestinationCard';
 import FilterBar from '../../components/home/FilterBar';
 import CategorySection from '../../components/home/CategorySection';
 import DestinationModal from '../../components/destination/DestinationModal';
+import InteractiveMap from '../../components/map/InteractiveMap';
 import { placesService } from '../../services/placesService';
 import type { Place, Category } from '../../models/Place.model';
 
@@ -19,6 +20,25 @@ const Home: React.FC = () => {
     const [totalPlaces, setTotalPlaces] = useState(0);
     const [selectedDestination, setSelectedDestination] = useState<Place | null>(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
+
+    const [isMapVisible, setIsMapVisible] = useState(false);
+    const mapContainerRef = React.useRef<HTMLDivElement>(null);
+
+    // Lazy load map when it enters the viewport (with 300px margin)
+    useEffect(() => {
+        const observer = new IntersectionObserver(([entry]) => {
+            if (entry.isIntersecting) {
+                setIsMapVisible(true);
+                observer.disconnect();
+            }
+        }, { rootMargin: '300px' });
+
+        if (mapContainerRef.current) {
+            observer.observe(mapContainerRef.current);
+        }
+
+        return () => observer.disconnect();
+    }, []);
 
     // Cargar categorías al inicio
     useEffect(() => {
@@ -73,6 +93,18 @@ const Home: React.FC = () => {
         }
     };
 
+    const handleMarkerClick = React.useCallback(async (destinationId: number) => {
+        try {
+            const destination = await placesService.getOne(destinationId);
+            if (destination) {
+                setSelectedDestination(destination);
+                setIsModalOpen(true);
+            }
+        } catch (error) {
+            console.error('Error al abrir modal desde el mapa:', error);
+        }
+    }, []);
+
     const handleCloseModal = () => {
         setIsModalOpen(false);
         setSelectedDestination(null);
@@ -108,6 +140,29 @@ const Home: React.FC = () => {
                     />
                 </div>
             )}
+
+            {/* Map Section */}
+            <div ref={mapContainerRef} className="w-full max-w-7xl px-4 mt-8 mb-4 animate-fade-in-up" style={{ animationDelay: '0.15s' }}>
+                <div className="flex items-center gap-2 mb-6">
+                    <h2 className="text-3xl font-bold text-gray-800 font-display">
+                        Mapa de Destinos
+                    </h2>
+                </div>
+                <div className="rounded-3xl overflow-hidden shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-gray-100 min-h-[500px] z-0 relative">
+                    {isMapVisible ? (
+                        <InteractiveMap
+                            destinations={places as any[]}
+                            onMarkerClick={handleMarkerClick}
+                            shouldAutoFit={true}
+                        />
+                    ) : (
+                        <div className="w-full h-[500px] flex flex-col items-center justify-center bg-gray-50/50 animate-pulse text-gray-400">
+                            <svg className="w-12 h-12 mb-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                            <span>Cargando mapa...</span>
+                        </div>
+                    )}
+                </div>
+            </div>
 
             <main id="destinations-grid" className="w-full max-w-7xl px-4 mt-12 mb-12 animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
                 <div className="flex items-center gap-4 mb-8">
@@ -166,7 +221,7 @@ const Home: React.FC = () => {
                                             className={`w-10 h-10 rounded-xl font-bold transition-all shadow-sm ${currentPage === page
                                                 ? 'bg-eco-primary-600 text-white'
                                                 : 'bg-white text-gray-600 hover:bg-gray-50 border border-gray-200'
-                                            }`}
+                                                }`}
                                         >
                                             {page}
                                         </button>
@@ -185,6 +240,7 @@ const Home: React.FC = () => {
                         )}
                     </>
                 )}
+
             </main>
 
             {selectedDestination && (
