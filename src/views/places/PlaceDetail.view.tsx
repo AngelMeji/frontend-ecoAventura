@@ -44,7 +44,7 @@ const PlaceDetail: React.FC = () => {
 
     if (loading) {
         return (
-            <div className="min-h-screen flex items-center justify-center bg-eco-bg flex-col gap-4">
+            <div className="flex items-center justify-center py-32 flex-col gap-4">
                 <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-eco-primary-600"></div>
                 <p className="text-xl font-display text-eco-primary-800 animate-pulse">Cargando...</p>
             </div>
@@ -53,7 +53,7 @@ const PlaceDetail: React.FC = () => {
 
     if (!place) {
         return (
-            <div className="min-h-screen flex flex-col items-center justify-center bg-eco-bg p-4 text-center relative overflow-hidden">
+            <div className="flex flex-col items-center justify-center py-32 p-4 text-center">
                 <h2 className="text-3xl font-display font-bold text-gray-800 mb-3">Lugar no encontrado</h2>
                 <div className="flex gap-4 mt-4">
                     <button onClick={() => navigate('/home')} className="px-6 py-3 rounded-full border-2 border-eco-primary-200 text-eco-primary-700 font-semibold hover:bg-eco-primary-50 transition-colors">Volver al Inicio</button>
@@ -77,8 +77,8 @@ const PlaceDetail: React.FC = () => {
     };
 
     return (
-        <div className="min-h-screen bg-eco-bg pb-12">
-            <main className="container mx-auto px-4 py-8 max-w-5xl">
+        <div className="bg-eco-bg pb-12">
+            <div className="container mx-auto px-4 py-8 max-w-5xl">
                 <button
                     onClick={() => navigate('/home')}
                     className="group flex items-center gap-2 px-5 py-2.5 bg-white text-eco-primary-700 rounded-full shadow-md hover:shadow-lg transition-all duration-300 mb-8 border border-eco-primary-100"
@@ -259,7 +259,7 @@ const PlaceDetail: React.FC = () => {
                         </>
                     )}
                 </div>
-            </main>
+            </div>
         </div>
     );
 };
