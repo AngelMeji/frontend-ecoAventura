@@ -8,6 +8,7 @@ import { getTranslatedPlace } from '../../translations/places';
 import ConfirmationModal from '../common/ConfirmationModal';
 import { getOptimizedImageUrl } from '../../utils/imageUtils';
 import SafeImage from '../common/SafeImage';
+import PlaceChatbot from '../places/PlaceChatbot';
 
 // URL base para las imágenes (storage)
 
@@ -32,7 +33,7 @@ const DestinationModal: React.FC<DestinationModalProps> = ({
         getTranslatedPlace(getUnwrappedDestination(initialDestination), language)
     );
 
-    const [activeTab, setActiveTab] = useState<'info' | 'reviews'>('info');
+    const [activeTab, setActiveTab] = useState<'info' | 'reviews' | 'chatbot'>('info');
     const [currentImageIndex, setCurrentImageIndex] = useState(0);
     const [rating, setRating] = useState(0);
     const [comment, setComment] = useState('');
@@ -361,10 +362,21 @@ const DestinationModal: React.FC<DestinationModalProps> = ({
                                     {t('home.modal.tabs.reviews')}
                                 </span>
                             </button>
+                            <button
+                                onClick={() => setActiveTab('chatbot')}
+                                className={`flex-1 py-2 px-4 rounded-full text-sm font-medium transition-all ${activeTab === 'chatbot'
+                                    ? 'bg-eco-primary-100 text-eco-primary-800 shadow-sm'
+                                    : 'text-gray-600 hover:bg-gray-100'
+                                    }`}
+                            >
+                                <span className="flex items-center justify-center gap-2">
+                                    Asistente IA
+                                </span>
+                            </button>
                         </div>
                         {/* Content */}
                         <div className="flex-1 overflow-y-auto p-6 custom-scrollbar">
-                            {activeTab === 'info' ? (
+                            {activeTab === 'info' && (
                                 <div className="space-y-6">
                                     {/* Carousel */}
                                     <div className="relative h-64 md:h-80 rounded-2xl overflow-hidden group">
@@ -453,7 +465,9 @@ const DestinationModal: React.FC<DestinationModalProps> = ({
                                         </button>
                                     </div>
                                 </div>
-                            ) : (
+                            )}
+
+                            {activeTab === 'reviews' && (
                                 <div className="space-y-8">
                                     {/* Rating Summary */}
                                     <div className="bg-gray-50 rounded-xl p-6 border border-gray-100 flex items-center justify-between">
@@ -628,6 +642,12 @@ const DestinationModal: React.FC<DestinationModalProps> = ({
                                             </div>
                                         )}
                                     </div>
+                                </div>
+                            )}
+
+                            {activeTab === 'chatbot' && (
+                                <div className="animate-fade-in fade-in zoom-in duration-300">
+                                    <PlaceChatbot place={destination} />
                                 </div>
                             )}
                         </div>
