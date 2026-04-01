@@ -13,6 +13,7 @@ import ResetPassword from '../views/auth/ResetPassword.view';
 import Profile from '../views/Profile.view';
 import Home from '../views/home/Home.view';
 import PlaceDetail from '../views/places/PlaceDetail.view';
+import PlaceForm from '../views/places/PlaceForm.view';
 import Dashboard from '../views/Dashboard.view';
 import PartnerRequestsView from '../views/admin/PartnerRequests.view';
 
@@ -75,6 +76,14 @@ export const appRoutes: RouteObject[] = [
             {
                 path: '/admin/partner-requests',
                 element: <PartnerRequestsView />
+            },
+            {
+                path: '/admin/places/new',
+                element: <PlaceForm />
+            },
+            {
+                path: '/admin/places/:id/edit',
+                element: <PlaceForm />
             }
         ]
     }
