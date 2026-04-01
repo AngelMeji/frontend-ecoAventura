@@ -2,7 +2,6 @@ import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { placesService } from '../../services/placesService';
 import type { Place } from '../../models/Place.model';
-import Header from '../../components/layout/Header';
 import { authService } from '../../services/authService';
 import Alert from '../../components/common/Alert';
 import ConfirmationModal from '../../components/common/ConfirmationModal';
@@ -187,7 +186,6 @@ const PlaceDetail: React.FC = () => {
 
     return (
         <div className="min-h-screen bg-eco-bg pb-12">
-            <Header />
             <main className="container mx-auto px-4 py-8 max-w-5xl">
                 <button
                     onClick={() => navigate(-1)}
