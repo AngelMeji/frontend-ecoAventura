@@ -5,11 +5,13 @@ import { Navigate } from 'react-router-dom';
 import AuthLayout from '../components/layout/AuthLayout';
 import MainLayout from '../components/layout/MainLayout';
 
-// Views
+// Views - Auth
 import Login from '../views/auth/Login.view';
 import Register from '../views/auth/Register.view';
 import ForgotPassword from '../views/auth/ForgotPassword.view';
 import ResetPassword from '../views/auth/ResetPassword.view';
+
+// Views - Main
 import Profile from '../views/Profile.view';
 import Home from '../views/home/Home.view';
 import PlaceDetail from '../views/places/PlaceDetail.view';
@@ -20,7 +22,7 @@ import PartnerRequestsView from '../views/admin/PartnerRequests.view';
 export const appRoutes: RouteObject[] = [
     {
         path: '/',
-        element: <Navigate to="/home" replace /> // Redirect to Home in this branch
+        element: <Navigate to="/home" replace />
     },
     {
         path: '/login',
