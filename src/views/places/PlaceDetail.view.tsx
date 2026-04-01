@@ -6,9 +6,7 @@ import Header from '../../components/layout/Header';
 import { authService } from '../../services/authService';
 import Alert from '../../components/common/Alert';
 import ConfirmationModal from '../../components/common/ConfirmationModal';
-import PlaceChatbot from '../../components/places/PlaceChatbot';
 import { getOptimizedImageUrl } from '../../utils/imageUtils';
-import SafeImage from '../../components/common/SafeImage';
 
 const PlaceDetail: React.FC = () => {
     const { id } = useParams<{ id: string }>();
@@ -207,10 +205,11 @@ const PlaceDetail: React.FC = () => {
                 <div className="bg-white rounded-3xl shadow-xl overflow-hidden border border-gray-100">
                     {/* Header Image / Carousel */}
                     <div className="relative h-[400px] md:h-[500px] bg-gray-200 group">
-                        <SafeImage
+                        <img
                             src={images[currentImageIndex].full_url ? getOptimizedImageUrl(images[currentImageIndex].full_url) : getOptimizedImageUrl(images[currentImageIndex].image_path)}
                             alt={place.name}
                             className="w-full h-full object-cover transition-transform duration-700 hover:scale-105"
+                            onError={(e) => { (e.target as HTMLImageElement).src = '/assets/logo_Ecoaventura_fondo.jpeg'; }}
                         />
                         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-80" />
 
@@ -607,8 +606,8 @@ const PlaceDetail: React.FC = () => {
                                 )}
 
                                 {activeTab === 'chatbot' && (
-                                    <div className="animate-fade-in">
-                                        <PlaceChatbot place={place} />
+                                    <div className="p-8 text-center text-gray-400">
+                                        <p>El chatbot no está disponible en esta versión.</p>
                                     </div>
                                 )}
                             </div>
