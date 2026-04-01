@@ -1,9 +1,10 @@
 import React from 'react';
 import { useLanguage } from '../../context/LanguageContext';
+import { Bird, TrendingUp, Coffee, Waves, MapPin, Droplets, Tent, Ticket, Eye, Map } from 'lucide-react';
 
 interface CategoryStat {
     name: string;
-    slug: string; // Added slug
+    slug: string;
     count: number;
     avgRating: number;
     icon: string;
@@ -11,7 +12,7 @@ interface CategoryStat {
 
 interface CategorySectionProps {
     categories: CategoryStat[];
-    activeCategory: string; // This will now be slug
+    activeCategory: string;
     onCategoryChange: (categorySlug: string) => void;
 }
 
@@ -21,6 +22,23 @@ const CategorySection: React.FC<CategorySectionProps> = ({
     onCategoryChange
 }) => {
     const { t } = useLanguage();
+
+    const getIconForCategory = (slug: string) => {
+        const iconClass = "w-6 h-6";
+        switch (slug) {
+            case 'avistamiento-de-aves': return <Bird className={iconClass} />;
+            case 'senderismo': return <TrendingUp className={iconClass} />;
+            case 'paisaje-cultural-cafetero': return <Coffee className={iconClass} />;
+            case 'termales': return <Waves className={iconClass} />;
+            case 'nevados-y-montanas': return <MapPin className={iconClass} />;
+            case 'cascadas': return <Droplets className={iconClass} />;
+            case 'glamping': return <Tent className={iconClass} />;
+            case 'parques-tematicos': return <Ticket className={iconClass} />;
+            case 'rios-y-lagos': return <Waves className={iconClass} />;
+            case 'miradores': return <Eye className={iconClass} />;
+            default: return <Map className={iconClass} />;
+        }
+    };
 
     return (
         <div className="mb-10">
@@ -56,12 +74,14 @@ const CategorySection: React.FC<CategorySectionProps> = ({
                         `}
                     >
                         <div className={`
-                            w-12 h-12 rounded-full flex items-center justify-center text-2xl mb-3
+                            w-12 h-12 rounded-full flex items-center justify-center mb-3
                             ${activeCategory === category.slug
                                 ? 'bg-eco-primary-500 text-white'
-                                : 'bg-eco-primary-100 text-eco-primary-600 group-hover:bg-eco-primary-200 group-hover:text-eco-primary-700 transition-colors'
+                                : 'bg-[#dcfce7] text-[#0F2E1B] group-hover:bg-eco-primary-200 group-hover:text-[#064e3b] transition-colors'
                             }
-                        `} dangerouslySetInnerHTML={{ __html: category.icon }} />
+                        `}>
+                            {getIconForCategory(category.slug)}
+                        </div>
 
                         <h3 className="font-bold text-gray-800 mb-1 group-hover:text-eco-primary-700">
                             {t(`home.categories.names.${category.slug}`) !== `home.categories.names.${category.slug}`
