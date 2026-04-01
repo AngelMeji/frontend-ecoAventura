@@ -12,6 +12,7 @@ import ForgotPassword from '../views/auth/ForgotPassword.view';
 import ResetPassword from '../views/auth/ResetPassword.view';
 import Profile from '../views/Profile.view';
 import Home from '../views/home/Home.view';
+import PlaceDetail from '../views/places/PlaceDetail.view';
 
 export const appRoutes: RouteObject[] = [
     {
@@ -60,6 +61,10 @@ export const appRoutes: RouteObject[] = [
             {
                 path: '/profile',
                 element: <Profile />
+            },
+            {
+                path: '/place/:id',
+                element: <PlaceDetail />
             }
         ]
     }
