@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { Navigate } from 'react-router-dom';
+import { Navigate, useNavigate } from 'react-router-dom';
 import { authService } from '../services/authService';
+import { placesService } from '../services/placesService';
 import Header from '../components/layout/Header';
 import { useLanguage } from '../context/LanguageContext';
 import { getOptimizedImageUrl, compressImage } from '../utils/imageUtils';
@@ -9,8 +10,10 @@ import SafeImage from '../components/common/SafeImage';
 const Profile: React.FC = () => {
     const { t } = useLanguage();
     const user = authService.getCurrentUser();
+    const navigate = useNavigate();
     const [loading, setLoading] = useState(false);
     const [msg, setMsg] = useState({ type: '', text: '' });
+    const [favorites, setFavorites] = useState<any[]>([]);
 
     const [profileData, setProfileData] = useState<{
         name: string;
@@ -39,6 +42,12 @@ const Profile: React.FC = () => {
                 bio: user.bio || '',
                 avatar: user.avatar || ''
             });
+            // Obtener favoritos
+            placesService.getFavorites()
+                .then(favs => {
+                    setFavorites(Array.isArray(favs) ? favs : []);
+                })
+                .catch(err => console.error('Error al obtener favoritos:', err));
         }
     }, [user?.id]);
 
@@ -395,6 +404,63 @@ const Profile: React.FC = () => {
                             </form>
                         </div>
                     </div>
+                </div>
+
+                {/* --- FAVORITES SECTION --- */}
+                <div className="mt-8 bg-white rounded-3xl shadow-lg border border-gray-100 p-8" id="favorites-section">
+                    <h2 className="text-xl font-display font-bold text-gray-800 mb-6 flex items-center gap-2">
+                        <svg className="w-5 h-5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" /></svg>
+                        Mis Favoritos
+                    </h2>
+                    
+                    {favorites.length === 0 ? (
+                        <div className="text-center py-12 bg-gray-50 rounded-2xl border border-dashed border-gray-200">
+                            <p className="text-gray-500 italic">No tienes lugares guardados aún.</p>
+                            <button onClick={() => navigate('/home')} className="mt-4 text-eco-primary-600 font-bold hover:underline">Explorar Mapa</button>
+                        </div>
+                    ) : (
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                            {favorites.map(place => (
+                                <div
+                                    key={place.id}
+                                    className="group bg-white rounded-2xl overflow-hidden shadow-sm border border-gray-100 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 cursor-pointer flex flex-col"
+                                    onClick={() => navigate(`/place/${place.slug || place.id}`)}
+                                >
+                                    <div className="aspect-video bg-gray-100 relative overflow-hidden">
+                                        <SafeImage
+                                            src={getOptimizedImageUrl(
+                                                (place.images && place.images.length > 0 && place.images[0])
+                                                    ? (place.images[0].full_url || place.images[0].image_path)
+                                                    : '/logo_Ecoaventura_fondo.jpeg'
+                                            )}
+                                            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                                            alt={place.name}
+                                        />
+                                        <div className="absolute top-2 right-2 bg-white/80 p-2 rounded-full text-red-500 shadow-sm border border-white">
+                                            <svg className="w-5 h-5" fill="currentColor" stroke="none" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                                            </svg>
+                                        </div>
+                                        <div className="absolute top-2 left-2 px-2 py-1 bg-eco-primary-500/90 backdrop-blur-md rounded-md text-[10px] text-white font-bold uppercase tracking-widest shadow-sm">
+                                            {place.category?.name}
+                                        </div>
+                                    </div>
+                                    <div className="p-4 flex flex-col flex-grow">
+                                        <h3 className="font-bold text-gray-900 group-hover:text-eco-primary-600 transition-colors line-clamp-1">{place.name}</h3>
+                                        <div className="flex items-center text-gray-500 text-xs mt-1 truncate">
+                                            <svg className="w-3 h-3 mr-1 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+                                            <span className="truncate">{place.address}</span>
+                                        </div>
+                                        <div className="flex items-center justify-between mt-auto pt-3">
+                                            <span className="bg-red-50 text-red-600 text-[10px] uppercase font-bold px-2 py-1 rounded-full border border-red-100">
+                                                {t('home.modal.actions.removeFromFavorites') || 'Quitar de Favoritos'}
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    )}
                 </div>
             </main>
         </div>
