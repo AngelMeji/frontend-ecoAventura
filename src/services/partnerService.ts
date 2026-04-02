@@ -39,7 +39,7 @@ export const partnerService = {
         return response.data;
     },
 
-    markAsRead: async (id: number) => {
+    markAsRead: async (id: number | string) => {
         const response = await api.patch<{ message: string }>(`/notifications/${id}/read`);
         return response.data;
     }
@@ -49,4 +49,5 @@ export interface NotificationResponse {
     type: 'admin' | 'user';
     count?: number; // For admin
     notifications?: PartnerRequest[]; // For user
+    generic_notifications?: any[]; // For user
 }

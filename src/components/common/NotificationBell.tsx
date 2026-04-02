@@ -1,12 +1,11 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { partnerService } from '../../services/partnerService';
-import type { PartnerRequest } from '../../services/partnerService';
 import { authService } from '../../services/authService';
 
 const NotificationBell: React.FC = () => {
     const user = authService.getCurrentUser();
     const [open, setOpen] = useState(false);
-    const [notifications, setNotifications] = useState<PartnerRequest[]>([]);
+    const [notifications, setNotifications] = useState<any[]>([]);
     const [adminCount, setAdminCount] = useState(0);
     const [loading, setLoading] = useState(false);
     const panelRef = useRef<HTMLDivElement>(null);
@@ -37,7 +36,12 @@ const NotificationBell: React.FC = () => {
                 setAdminCount(data.count ?? 0);
                 setNotifications([]);
             } else {
-                setNotifications(data.notifications ?? []);
+                const partnerReqs = data.notifications || [];
+                const generic = data.generic_notifications || [];
+                const combined = [...partnerReqs, ...generic].sort((a, b) => 
+                    new Date(b.updated_at || b.created_at).getTime() - new Date(a.updated_at || a.created_at).getTime()
+                );
+                setNotifications(combined);
                 setAdminCount(0);
             }
         } catch {
@@ -45,7 +49,7 @@ const NotificationBell: React.FC = () => {
         }
     };
 
-    const handleMarkAsRead = async (id: number) => {
+    const handleMarkAsRead = async (id: string | number) => {
         try {
             setLoading(true);
             await partnerService.markAsRead(id);
@@ -186,6 +190,37 @@ const NotificationBell: React.FC = () => {
                             ) : (
                                 <ul className="divide-y divide-gray-50">
                                     {notifications.map(n => {
+                                        if (n.type === 'App\\Notifications\\ReviewSuspendedNotification') {
+                                            return (
+                                                <li key={n.id} className="px-4 py-3 hover:bg-gray-50 transition-colors">
+                                                    <div className="flex items-start justify-between gap-2">
+                                                        <div className="flex-1 min-w-0">
+                                                            <p className="text-sm font-semibold text-gray-800 break-words">
+                                                                Tu reseña en {n.data?.place_name || 'un lugar'} ha sido ocultada.
+                                                            </p>
+                                                            <p className="text-xs text-red-600 mt-1 italic break-words">
+                                                                Motivo: {n.data?.reason}
+                                                            </p>
+                                                            <span className="inline-block mt-1 text-[11px] font-bold px-2 py-0.5 rounded-full border text-red-700 bg-red-50 border-red-200">
+                                                                Suspendida
+                                                            </span>
+                                                        </div>
+                                                        <button
+                                                            onClick={() => handleMarkAsRead(n.id)}
+                                                            disabled={loading}
+                                                            className="p-1 rounded-full hover:bg-red-50 text-gray-400 hover:text-red-500 transition-colors flex-shrink-0 disabled:opacity-40"
+                                                            aria-label="Marcar como leída"
+                                                            title="Cerrar notificación"
+                                                        >
+                                                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                                            </svg>
+                                                        </button>
+                                                    </div>
+                                                </li>
+                                            );
+                                        }
+
                                         const { text, cls } = statusLabel(n.status);
                                         return (
                                             <li key={n.id} className="px-4 py-3 hover:bg-gray-50 transition-colors">
