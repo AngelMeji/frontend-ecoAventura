@@ -224,6 +224,32 @@ const NotificationBell: React.FC = () => {
                                                     </div>
                                                 </li>
                                             );
+                                        } else if (n.type === 'App\\Notifications\\ReviewRestoredNotification') {
+                                            return (
+                                                <li key={n.id} className="px-4 py-3 hover:bg-gray-50 transition-colors">
+                                                    <div className="flex items-start justify-between gap-2">
+                                                        <div className="flex-1 min-w-0">
+                                                            <p className="text-sm font-semibold text-gray-800 break-words">
+                                                                Tu reseña en {n.data?.place_name || 'un lugar'} ha sido restaurada.
+                                                            </p>
+                                                            <span className="inline-block mt-1 text-[11px] font-bold px-2 py-0.5 rounded-full border text-green-700 bg-green-50 border-green-200">
+                                                                Activa
+                                                            </span>
+                                                        </div>
+                                                        <button
+                                                            onClick={() => handleMarkAsRead(n.id)}
+                                                            disabled={loading}
+                                                            className="p-1 rounded-full hover:bg-green-50 text-gray-400 hover:text-green-500 transition-colors flex-shrink-0 disabled:opacity-40"
+                                                            aria-label="Marcar como leída"
+                                                            title="Cerrar notificación"
+                                                        >
+                                                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                                            </svg>
+                                                        </button>
+                                                    </div>
+                                                </li>
+                                            );
                                         }
 
                                         const { text, cls } = statusLabel(n.status);
