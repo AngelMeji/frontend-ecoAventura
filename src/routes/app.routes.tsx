@@ -95,6 +95,14 @@ export const appRoutes: RouteObject[] = [
                 element: <PlaceForm />
             },
             {
+                path: '/places/create',
+                element: <PlaceForm />
+            },
+            {
+                path: '/places/edit/:id',
+                element: <PlaceForm />
+            },
+            {
                 path: '/about-us',
                 element: <AboutUs />
             },
