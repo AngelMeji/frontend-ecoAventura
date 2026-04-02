@@ -11,6 +11,7 @@ import Register from '../views/auth/Register.view';
 import ForgotPassword from '../views/auth/ForgotPassword.view';
 import ResetPassword from '../views/auth/ResetPassword.view';
 import Profile from '../views/Profile.view';
+import Dashboard from '../views/Dashboard.view';
 import Home from '../views/home/Home.view';
 import PlaceDetail from '../views/places/PlaceDetail.view';
 
@@ -61,6 +62,10 @@ export const appRoutes: RouteObject[] = [
             {
                 path: '/profile',
                 element: <Profile />
+            },
+            {
+                path: '/dashboard',
+                element: <Dashboard />
             },
             {
                 path: '/place/:id',
