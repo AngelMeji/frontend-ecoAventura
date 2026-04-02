@@ -19,6 +19,11 @@ import PlaceForm from '../views/places/PlaceForm.view';
 import Dashboard from '../views/Dashboard.view';
 import PartnerRequestsView from '../views/admin/PartnerRequests.view';
 
+// Views - Legal
+import AboutUs from '../views/legal/AboutUs.view';
+import Terms from '../views/legal/Terms.view';
+import Privacy from '../views/legal/Privacy.view';
+
 export const appRoutes: RouteObject[] = [
     {
         path: '/',
@@ -86,6 +91,18 @@ export const appRoutes: RouteObject[] = [
             {
                 path: '/admin/places/:id/edit',
                 element: <PlaceForm />
+            },
+            {
+                path: '/about-us',
+                element: <AboutUs />
+            },
+            {
+                path: '/terms',
+                element: <Terms />
+            },
+            {
+                path: '/privacy',
+                element: <Privacy />
             }
         ]
     }
