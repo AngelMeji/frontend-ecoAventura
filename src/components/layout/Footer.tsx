@@ -27,7 +27,6 @@ const Footer: React.FC = () => {
                         <p className="text-gray-400 text-sm leading-relaxed mb-6">
                             Conectando viajeros conscientes con la exuberante naturaleza de Risaralda. Turismo que protege y preserva.
                         </p>
-                        
                     </div>
 
                     {/* Quick Links */}
@@ -35,7 +34,7 @@ const Footer: React.FC = () => {
                         <h4 className="text-lg font-bold mb-6 text-eco-accent">Explorar</h4>
                         <ul className="space-y-3 text-gray-400 text-sm">
                             <li><a href="/home" className="hover:text-white transition-colors flex items-center gap-2">Destinos</a></li>
-                            <li><a href="/about" className="hover:text-white transition-colors flex items-center gap-2">Sobre Nosotros</a></li>
+                            <li><Link to="/about-us" className="hover:text-white transition-colors flex items-center gap-2">Sobre Nosotros</Link></li>
                             <li><a href="#" className="hover:text-white transition-colors flex items-center gap-2">Blog (Pronto)</a></li>
                         </ul>
                     </div>
@@ -44,7 +43,7 @@ const Footer: React.FC = () => {
                     <div>
                         <h4 className="text-lg font-bold mb-6 text-eco-accent">Soporte</h4>
                         <ul className="space-y-3 text-gray-400 text-sm">
-                            <li><a href="/terms" className="hover:text-white transition-colors">Términos y Condiciones</a></li>
+                            <li><Link to="/terms" className="hover:text-white transition-colors">Términos y Condiciones</Link></li>
                             <li><Link to="/privacy" className="hover:text-white transition-colors">{t('home.footer.privacy')}</Link></li>
                             <li><Link to="/cookies" className="hover:text-white transition-colors">{t('home.footer.cookies')}</Link></li>
                             {showPartnerButton && <li><a href="/partner-request" className="hover:text-white transition-colors">Ser Socio</a></li>}
