@@ -2,6 +2,7 @@ import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import Logo from '../common/Logo';
 import AccessibilityMenu from '../common/AccessibilityMenu';
+import NotificationBell from '../common/NotificationBell';
 import { authService } from '../../services/authService';
 import { useLanguage } from '../../context/LanguageContext';
 import SafeImage from '../common/SafeImage';
@@ -91,6 +92,8 @@ const Header: React.FC = () => {
                             >
                                 {user.role === 'admin' ? t('header.adminPanel') : (user.role === 'partner' ? t('header.partnerPanel') : t('header.myAccount'))}
                             </Link>
+
+                            <NotificationBell />
 
                             <div className="flex items-center gap-2">
                                 <div className="w-8 h-8 rounded-full bg-eco-primary-100 flex items-center justify-center text-eco-primary-700 font-bold text-sm overflow-hidden border border-eco-primary-200 shrink-0">
