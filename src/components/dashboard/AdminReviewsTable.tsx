@@ -32,6 +32,8 @@ const AdminReviewsTable: React.FC<AdminReviewsTableProps> = ({ onNotify, initial
     const [lastPage, setLastPage] = useState(1);
     const [totalReviews, setTotalReviews] = useState(0);
     const [toggling, setToggling] = useState<number | null>(null);
+    const [reasonModal, setReasonModal] = useState<{isOpen: boolean, reviewId: number | null}>({isOpen: false, reviewId: null});
+    const [reason, setReason] = useState('');
 
     useEffect(() => {
         if (initialReviews) {
@@ -84,13 +86,23 @@ const AdminReviewsTable: React.FC<AdminReviewsTableProps> = ({ onNotify, initial
         }
     };
 
-    const handleToggleHide = async (id: number) => {
+    const handleToggleClick = (review: Review) => {
+        if (!review.is_hidden) {
+            setReasonModal({ isOpen: true, reviewId: review.id });
+            setReason('');
+        } else {
+            handleToggleHide(review.id);
+        }
+    };
+
+    const handleToggleHide = async (id: number, reasonText?: string) => {
         setToggling(id);
         try {
-            const response = await placesService.toggleHideReview(id);
+            const response = await placesService.toggleHideReview(id, reasonText);
             setReviews(prev =>
                 prev.map(r => (r.id === id ? { ...r, is_hidden: response.review.is_hidden } : r))
             );
+            setReasonModal({ isOpen: false, reviewId: null });
         } catch (error) {
             console.error('Error al cambiar la visibilidad de la reseña:', error);
             onNotify({ type: 'error', message: 'Error al cambiar visibilidad del comentario' });
@@ -162,7 +174,7 @@ const AdminReviewsTable: React.FC<AdminReviewsTableProps> = ({ onNotify, initial
                                 </td>
                                 <td className="p-4 text-right">
                                     <button
-                                        onClick={() => handleToggleHide(review.id)}
+                                        onClick={() => handleToggleClick(review)}
                                         disabled={toggling === review.id}
                                         className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-colors disabled:opacity-50 ${review.is_hidden
                                             ? 'bg-green-100 text-green-700 hover:bg-green-200'
@@ -226,7 +238,7 @@ const AdminReviewsTable: React.FC<AdminReviewsTableProps> = ({ onNotify, initial
 
                         <div className="flex justify-end pt-2 border-t border-gray-100">
                             <button
-                                onClick={() => handleToggleHide(review.id)}
+                                onClick={() => handleToggleClick(review)}
                                 disabled={toggling === review.id}
                                 className={`px-4 py-2 rounded-lg text-sm font-bold transition-colors disabled:opacity-50 ${review.is_hidden
                                     ? 'bg-green-100 text-green-700'
@@ -288,6 +300,38 @@ const AdminReviewsTable: React.FC<AdminReviewsTableProps> = ({ onNotify, initial
                         >
                             Siguiente
                         </button>
+                    </div>
+                </div>
+            )}
+
+            {reasonModal.isOpen && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+                    <div className="bg-white rounded-xl shadow-xl w-full max-w-md p-6">
+                        <h3 className="text-lg font-bold mb-4 text-gray-900">Motivo de la suspensión</h3>
+                        <p className="text-sm text-gray-600 mb-4">Por favor indica el motivo por el cual se oculta esta reseña. El usuario recibirá una notificación con este motivo.</p>
+                        <textarea
+                            className="w-full border border-gray-300 rounded-lg p-3 text-sm focus:ring-2 focus:ring-eco-primary-500 outline-none"
+                            rows={4}
+                            value={reason}
+                            onChange={(e) => setReason(e.target.value)}
+                            placeholder="Ej: Uso de lenguaje inapropiado..."
+                        ></textarea>
+                        <div className="flex justify-end gap-3 mt-4">
+                            <button
+                                onClick={() => setReasonModal({isOpen: false, reviewId: null})}
+                                className="px-4 py-2 text-sm font-medium text-gray-600 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
+                                disabled={toggling === reasonModal.reviewId}
+                            >
+                                Cancelar
+                            </button>
+                            <button
+                                onClick={() => reasonModal.reviewId && handleToggleHide(reasonModal.reviewId, reason)}
+                                disabled={!reason.trim() || toggling === reasonModal.reviewId}
+                                className="px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700 disabled:opacity-50 transition-colors"
+                            >
+                                {toggling === reasonModal.reviewId ? 'Ocultando...' : 'Ocultar y Notificar'}
+                            </button>
+                        </div>
                     </div>
                 </div>
             )}

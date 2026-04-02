@@ -189,8 +189,8 @@ export const placesService = {
     },
 
 
-    async toggleHideReview(id: number): Promise<any> {
-        const response = await api.patch(`/admin/reviews/${id}/toggle-hide`);
+    async toggleHideReview(id: number, reason?: string): Promise<any> {
+        const response = await api.patch(`/admin/reviews/${id}/toggle-hide`, { reason });
         return response.data;
     },
 
