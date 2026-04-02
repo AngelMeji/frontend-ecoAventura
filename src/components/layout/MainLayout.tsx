@@ -2,7 +2,6 @@ import React from 'react';
 import { Outlet } from 'react-router-dom';
 import Header from './Header';
 import Footer from './Footer';
-import CookieBanner from '../common/CookieBanner';
 
 const MainLayout: React.FC = () => {
     return (
@@ -12,7 +11,6 @@ const MainLayout: React.FC = () => {
                 <Outlet />
             </main>
             <Footer />
-            <CookieBanner />
         </div>
     );
 };

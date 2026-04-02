@@ -18,11 +18,13 @@ import PlaceDetail from '../views/places/PlaceDetail.view';
 import PlaceForm from '../views/places/PlaceForm.view';
 import Dashboard from '../views/Dashboard.view';
 import PartnerRequestsView from '../views/admin/PartnerRequests.view';
+import PartnerRequest from '../views/partner/PartnerRequest.view';
 
 // Views - Legal
 import AboutUs from '../views/legal/AboutUs.view';
 import Terms from '../views/legal/Terms.view';
 import Privacy from '../views/legal/Privacy.view';
+import Cookies from '../views/legal/Cookies.view';
 
 export const appRoutes: RouteObject[] = [
     {
@@ -103,6 +105,14 @@ export const appRoutes: RouteObject[] = [
             {
                 path: '/privacy',
                 element: <Privacy />
+            },
+            {
+                path: '/cookies',
+                element: <Cookies />
+            },
+            {
+                path: '/partner-request',
+                element: <PartnerRequest />
             }
         ]
     }
