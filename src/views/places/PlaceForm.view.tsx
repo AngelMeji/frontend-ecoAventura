@@ -2,7 +2,6 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { placesService } from '../../services/placesService';
 import type { Category, PlaceImage } from '../../models/Place.model';
-import Header from '../../components/layout/Header';
 import { authService } from '../../services/authService';
 import Alert from '../../components/common/Alert';
 import ConfirmationModal from '../../components/common/ConfirmationModal';
@@ -308,8 +307,7 @@ const PlaceForm: React.FC = () => {
 
     return (
         <div className="min-h-screen bg-eco-bg font-sans">
-            <Header />
-            <div className="container mx-auto px-4 py-12 max-w-4xl">
+            <div className="container mx-auto px-4 py-8 md:py-12 max-w-4xl">
                 <div className="flex items-center gap-4 mb-8">
                     <button
                         onClick={() => navigate('/dashboard')}
