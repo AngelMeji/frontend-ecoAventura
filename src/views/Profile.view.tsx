@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Navigate } from 'react-router-dom';
 import { authService } from '../services/authService';
-import Header from '../components/layout/Header';
+
+
 import { useLanguage } from '../context/LanguageContext';
 import { getOptimizedImageUrl, compressImage } from '../utils/imageUtils';
 import SafeImage from '../components/common/SafeImage';
@@ -213,7 +214,6 @@ const Profile: React.FC = () => {
 
     return (
         <div className="min-h-screen bg-gray-50 font-sans">
-            <Header />
             <main className="container mx-auto px-4 py-8 max-w-4xl animate-fade-in-up">
                 <div className="flex items-center gap-4 mb-8">
                     <div className="p-3 bg-eco-primary-100 rounded-2xl text-eco-primary-600">
@@ -396,6 +396,7 @@ const Profile: React.FC = () => {
                         </div>
                     </div>
                 </div>
+
             </main>
         </div>
     );
