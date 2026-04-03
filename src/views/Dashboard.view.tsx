@@ -2,7 +2,6 @@ import React, { useEffect, useState } from 'react';
 import { Navigate, useNavigate } from 'react-router-dom';
 import { authService } from '../services/authService';
 import { placesService } from '../services/placesService';
-
 import type { Place } from '../models/Place.model';
 import AdminUsersTable from '../components/dashboard/AdminUsersTable';
 import AdminReviewsTable from '../components/dashboard/AdminReviewsTable';
@@ -41,7 +40,7 @@ const Dashboard: React.FC = () => {
 
     useEffect(() => {
         loadDashboardData();
-    }, [user?.role]);
+    }, [user.role]);
 
     const loadDashboardData = async () => {
         setLoading(true);
@@ -62,32 +61,32 @@ const Dashboard: React.FC = () => {
                     dashboardData = await placesService.getPartnerDashboard();
                     setStats(dashboardData?.stats || {});
                 } catch (error) {
-                    console.warn('ÔÜá´©Å Partner dashboard endpoint fall├│ (probablemente error de backend), usando fallback:', error);
-                    // Si falla, al menos inicializamos stats vac├¡o
+                    console.warn('⚠️ Partner dashboard endpoint falló (probablemente error de backend), usando fallback:', error);
+                    // Si falla, al menos inicializamos stats vacío
                     setStats({});
                 }
 
                 // Robust extraction for Partner Places
                 let pPlaces: Place[] = [];
 
-                // 1. Try direct from dashboard (si funcion├│)
+                // 1. Try direct from dashboard (si funcionó)
                 if (dashboardData?.places && Array.isArray(dashboardData.places)) {
                     pPlaces = dashboardData.places;
                 } else if (dashboardData?.places?.data && Array.isArray(dashboardData.places.data)) {
                     pPlaces = dashboardData.places.data;
                 }
 
-                // 2. Fallback: Fetch all usando /api/places?user_id=X (siempre intentar si est├í vac├¡o)
+                // 2. Fallback: Fetch all usando /api/places?user_id=X (siempre intentar si está vacío)
                 if (pPlaces.length === 0) {
                     try {
                         const allResp: any = await placesService.getAll({ user_id: user.id });
                         pPlaces = Array.isArray(allResp) ? allResp : allResp.data || [];
                     } catch (e) {
-                        console.error('ÔØî Fallo al obtener socios (fallback):', e);
+                        console.error('❌ Fallo al obtener socios (fallback):', e);
                     }
                 }
                 setPartnerPlaces(pPlaces);
-                // Obtener favoritos para el socio tambi├®n
+                // Obtener favoritos para el socio también
                 try {
                     const favs = await placesService.getFavorites();
                     setFavorites(Array.isArray(favs) ? favs : []);
@@ -95,7 +94,7 @@ const Dashboard: React.FC = () => {
                     setFavorites([]);
                 }
             } else {
-                // L├│gica para el Dashboard de Usuario (Optimizado V2) - Paralelizado
+                // Lógica para el Dashboard de Usuario (Optimizado V2) - Paralelizado
                 const [dashboardResult, favsResult] = await Promise.allSettled([
                     placesService.getUserDashboard(),
                     placesService.getFavorites()
@@ -110,7 +109,7 @@ const Dashboard: React.FC = () => {
                 if (favsResult.status === 'fulfilled') {
                     setFavorites(favsResult.value);
                 } else {
-                    console.error('ÔØî Fallo al obtener favoritos:', favsResult.reason);
+                    console.error('❌ Fallo al obtener favoritos:', favsResult.reason);
                     setFavorites([]);
                 }
             }
@@ -195,7 +194,6 @@ const Dashboard: React.FC = () => {
 
     return (
         <div className="min-h-screen bg-gray-50 font-sans">
-
             <main className="container mx-auto px-4 py-8 relative">
                 {/* Global Feedback */}
                 {alert && (
@@ -329,7 +327,7 @@ const Dashboard: React.FC = () => {
                                 {stats?.top_rated ? (
                                     <>
                                         <div className="mt-4 font-bold text-xl text-yellow-600 truncate">{stats.top_rated.name}</div>
-                                        <div className="text-xs text-gray-400">{Number(stats.top_rated.rating).toFixed(1)} Ôÿà ({stats.top_rated.count} {t('home.dashboard.stats.reviews')})</div>
+                                        <div className="text-xs text-gray-400">{Number(stats.top_rated.rating).toFixed(1)} ★ ({stats.top_rated.count} {t('home.dashboard.stats.reviews')})</div>
                                     </>
                                 ) : <div className="mt-4 text-gray-400 italic">{t('home.dashboard.stats.noData')}</div>}
                             </div>
@@ -369,7 +367,7 @@ const Dashboard: React.FC = () => {
                                         <svg className="w-5 h-5 text-teal-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" /></svg>
                                         Solicitudes de Socios
                                     </h2>
-                                    <span className="text-xs bg-teal-100 text-teal-800 px-2 py-1 rounded-full">Gesti├│n</span>
+                                    <span className="text-xs bg-teal-100 text-teal-800 px-2 py-1 rounded-full">Gestión</span>
                                 </div>
                                 <div className="p-6 flex flex-col items-center text-center">
                                     <p className="text-gray-600 mb-6 max-w-lg">
@@ -530,7 +528,7 @@ const Dashboard: React.FC = () => {
                                                         onClick={() => {
                                                             setModal({
                                                                 title: 'Rechazar Lugar',
-                                                                message: '┬┐Est├ís seguro de que deseas rechazar este lugar?',
+                                                                message: '¿Estás seguro de que deseas rechazar este lugar?',
                                                                 type: 'danger',
                                                                 onConfirm: async () => {
                                                                     try {
@@ -557,7 +555,7 @@ const Dashboard: React.FC = () => {
                                                         onClick={() => {
                                                             setModal({
                                                                 title: 'Solicitar Cambios',
-                                                                message: '┬┐El lugar requiere correcciones por parte del socio?',
+                                                                message: '¿El lugar requiere correcciones por parte del socio?',
                                                                 type: 'warning',
                                                                 onConfirm: async () => {
                                                                     try {
@@ -589,7 +587,7 @@ const Dashboard: React.FC = () => {
                                     {pendingPagination.lastPage > 1 && (
                                         <div className="p-4 border-t border-gray-100 bg-gray-50/30 flex flex-col md:flex-row items-center justify-between gap-4">
                                             <div className="text-xs text-gray-500">
-                                                P├ígina <span className="font-bold">{pendingPagination.currentPage}</span> de <span className="font-bold">{pendingPagination.lastPage}</span> ({pendingPagination.total} pendientes)
+                                                Página <span className="font-bold">{pendingPagination.currentPage}</span> de <span className="font-bold">{pendingPagination.lastPage}</span> ({pendingPagination.total} pendientes)
                                             </div>
                                             <div className="flex items-center gap-2">
                                                 <button
@@ -653,7 +651,7 @@ const Dashboard: React.FC = () => {
                                                                 const newStatus = e.target.value;
                                                                 setModal({
                                                                     title: 'Cambiar Estado',
-                                                                    message: `┬┐Est├ís seguro de que deseas cambiar el estado a "${statusMap[newStatus] || newStatus}"?`,
+                                                                    message: `¿Estás seguro de que deseas cambiar el estado a "${statusMap[newStatus] || newStatus}"?`,
                                                                     type: 'success',
                                                                     onConfirm: async () => {
                                                                         try {
@@ -688,7 +686,7 @@ const Dashboard: React.FC = () => {
                                                             onClick={() => {
                                                                 setModal({
                                                                     title: 'Eliminar Lugar',
-                                                                    message: '┬┐Est├ís seguro de que deseas eliminar este lugar? Esta acci├│n no se puede deshacer.',
+                                                                    message: '¿Estás seguro de que deseas eliminar este lugar? Esta acción no se puede deshacer.',
                                                                     type: 'danger',
                                                                     onConfirm: async () => {
                                                                         try {
@@ -743,7 +741,7 @@ const Dashboard: React.FC = () => {
                                                             const newStatus = e.target.value;
                                                             setModal({
                                                                 title: 'Cambiar Estado',
-                                                                message: `┬┐Est├ís seguro de que deseas cambiar el estado a "${statusMap[newStatus] || newStatus}"?`,
+                                                                message: `¿Estás seguro de que deseas cambiar el estado a "${statusMap[newStatus] || newStatus}"?`,
                                                                 type: 'success',
                                                                 onConfirm: async () => {
                                                                     try {
@@ -777,7 +775,7 @@ const Dashboard: React.FC = () => {
 
                                             <div className="flex justify-end gap-2 pt-2 border-t border-gray-50">
                                                 <button
-                                                    onClick={() => navigate(`/places/edit/${place.id}`)}
+                                                    onClick={() => navigate(`/places/${place.id}/edit`)}
                                                     className="px-3 py-1.5 bg-blue-50 text-blue-700 rounded-lg text-sm font-medium"
                                                 >
                                                     Editar
@@ -786,7 +784,7 @@ const Dashboard: React.FC = () => {
                                                     onClick={() => {
                                                         setModal({
                                                             title: 'Eliminar Lugar',
-                                                            message: '┬┐Est├ís seguro de que deseas eliminar este lugar? Esta acci├│n no se puede deshacer.',
+                                                            message: '¿Estás seguro de que deseas eliminar este lugar? Esta acción no se puede deshacer.',
                                                             type: 'danger',
                                                             onConfirm: async () => {
                                                                 try {
@@ -814,7 +812,7 @@ const Dashboard: React.FC = () => {
                                 {adminPagination.lastPage > 1 && (
                                     <div className="p-6 border-t border-gray-100 bg-gray-50/30 flex flex-col md:flex-row items-center justify-between gap-4">
                                         <div className="text-sm text-gray-500">
-                                            Mostrando p├ígina <span className="font-bold text-gray-700">{adminPagination.currentPage}</span> de <span className="font-bold text-gray-700">{adminPagination.lastPage}</span>
+                                            Mostrando página <span className="font-bold text-gray-700">{adminPagination.currentPage}</span> de <span className="font-bold text-gray-700">{adminPagination.lastPage}</span>
                                             <span className="ml-1 text-xs">({adminPagination.total} lugares en total)</span>
                                         </div>
                                         <div className="flex items-center gap-2">
@@ -864,14 +862,14 @@ const Dashboard: React.FC = () => {
                                 <div className="p-6 border-b border-gray-100 bg-gray-50/50 flex justify-between items-center">
                                     <h2 className="text-xl font-bold text-gray-800 flex items-center gap-2">
                                         <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" /></svg>
-                                        Gesti├│n de Usuarios
+                                        Gestión de Usuarios
                                     </h2>
                                     <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded-full">Admin Only</span>
                                 </div>
                                 <div className="p-0">
                                     <AdminUsersTable
-                                        onNotify={(a: any) => setAlert(a)}
-                                        onConfirm={(c: any) => setModal(c)}
+                                        onNotify={(a) => setAlert(a)}
+                                        onConfirm={(c) => setModal(c)}
                                         initialUsers={(stats as any)?.recent_users}
                                     />
                                 </div>
@@ -882,7 +880,7 @@ const Dashboard: React.FC = () => {
                                 <div className="p-6 border-b border-gray-100 bg-purple-50/50 flex justify-between items-center">
                                     <h2 className="text-xl font-bold text-gray-800 flex items-center gap-2">
                                         <svg className="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z" /></svg>
-                                        Moderaci├│n de Rese├▒as
+                                        Moderación de Reseñas
                                     </h2>
                                     <span className="text-xs bg-purple-100 text-purple-800 px-2 py-1 rounded-full">Comentarios</span>
                                 </div>
@@ -1101,7 +1099,7 @@ const Dashboard: React.FC = () => {
 
                                                 {place.average_rating !== undefined && place.average_rating > 0 && (
                                                     <div className="absolute bottom-3 left-3 bg-white/90 backdrop-blur-sm px-2 py-1 rounded-lg flex items-center gap-1 shadow-sm">
-                                                        <span className="text-yellow-500 text-xs">Ôÿà</span>
+                                                        <span className="text-yellow-500 text-xs">★</span>
                                                         <span className="text-xs font-bold text-gray-800">{place.average_rating}</span>
                                                     </div>
                                                 )}
@@ -1120,7 +1118,7 @@ const Dashboard: React.FC = () => {
                         </div>
                     </div>
                 )}
-                
+
                 {/* --- FAVORITES SECTION FOR PARTNERS --- */}
                 {user.role === 'partner' && (
                     <div className="mt-8 bg-white rounded-xl shadow-sm overflow-hidden border border-gray-100" id="favorites-section">
@@ -1172,7 +1170,7 @@ const Dashboard: React.FC = () => {
                                             </div>
                                             {place.average_rating !== undefined && place.average_rating > 0 && (
                                                 <div className="absolute bottom-3 left-3 bg-white/90 backdrop-blur-sm px-2 py-1 rounded-lg flex items-center gap-1 shadow-sm">
-                                                    <span className="text-yellow-500 text-xs">Ôÿà</span>
+                                                    <span className="text-yellow-500 text-xs">★</span>
                                                     <span className="text-xs font-bold text-gray-800">{place.average_rating}</span>
                                                 </div>
                                             )}
@@ -1183,7 +1181,7 @@ const Dashboard: React.FC = () => {
                                             </h3>
                                             <div className="flex items-center gap-1.5 text-gray-500">
                                                 <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
-                                                <p className="text-xs truncate">{place.address || 'Sin direcci├│n'}</p>
+                                                <p className="text-xs truncate">{place.address || 'Sin dirección'}</p>
                                             </div>
                                         </div>
                                     </div>
