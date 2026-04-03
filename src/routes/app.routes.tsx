@@ -87,12 +87,20 @@ export const appRoutes: RouteObject[] = [
                 element: <PartnerRequestsView />
             },
             {
-                path: '/admin/places/new',
+                path: '/places/new',
                 element: <PlaceForm />
             },
             {
-                path: '/admin/places/:id/edit',
+                path: '/places/:id/edit',
                 element: <PlaceForm />
+            },
+            {
+                path: '/admin/places/new',
+                element: <Navigate to="/places/new" replace />
+            },
+            {
+                path: '/admin/places/:id/edit',
+                element: <Navigate to="/places/:id/edit" replace />
             },
             {
                 path: '/about-us',
