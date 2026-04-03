@@ -307,7 +307,7 @@ const PlaceForm: React.FC = () => {
 
     return (
         <div className="min-h-screen bg-eco-bg font-sans">
-            <div className="container mx-auto px-4 py-12 max-w-4xl">
+            <div className="container mx-auto px-4 py-8 md:py-12 max-w-4xl">
                 <div className="flex items-center gap-4 mb-8">
                     <button
                         onClick={() => navigate('/dashboard')}

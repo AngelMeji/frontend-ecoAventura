@@ -21,15 +21,16 @@ const FilterBar: React.FC<FilterBarProps> = ({
     };
 
     return (
-        <div className="bg-white rounded-xl shadow-md p-6 mb-6">
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 md:p-6 mb-6">
             {/* Search Input */}
             <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                     <svg
                         className="h-5 w-5 text-gray-400"
                         fill="none"
                         stroke="currentColor"
                         viewBox="0 0 24 24"
+                        aria-hidden="true"
                     >
                         <path
                             strokeLinecap="round"
@@ -39,12 +40,15 @@ const FilterBar: React.FC<FilterBarProps> = ({
                         />
                     </svg>
                 </div>
+                <label htmlFor="filter-search" className="sr-only">{t('home.filterBar.placeholder')}</label>
                 <input
-                    type="text"
+                    id="filter-search"
+                    type="search"
                     value={searchQuery}
                     onChange={handleSearchChange}
                     placeholder={t('home.filterBar.placeholder')}
-                    className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-eco-teal-500 focus:border-transparent transition-all"
+                    className="w-full pl-11 pr-4 py-3.5 min-h-[48px] border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-eco-primary-500 focus:border-transparent transition-all text-base bg-gray-50 focus:bg-white"
+                    aria-label={t('home.filterBar.placeholder')}
                 />
             </div>
         </div>
@@ -52,3 +56,4 @@ const FilterBar: React.FC<FilterBarProps> = ({
 };
 
 export default FilterBar;
+

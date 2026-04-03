@@ -103,6 +103,14 @@ export const appRoutes: RouteObject[] = [
                 element: <Navigate to="/places/:id/edit" replace />
             },
             {
+                path: '/places/create',
+                element: <Navigate to="/places/new" replace />
+            },
+            {
+                path: '/places/edit/:id',
+                element: <Navigate to="/places/:id/edit" replace />
+            },
+            {
                 path: '/about-us',
                 element: <AboutUs />
             },
