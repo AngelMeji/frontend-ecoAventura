@@ -362,7 +362,7 @@ const Dashboard: React.FC = () => {
 
                         <div className="grid grid-cols-1 lg:grid-cols-1 gap-8">
                             {/* HU012 - Admin Statistics Dashboard */}
-                            <AdminStatsDashboard initialStats={stats} />
+                            <AdminStatsDashboard />
 
                             {/* Admin Partner Requests Management */}
                             <div className="bg-white rounded-xl shadow-sm overflow-hidden border border-gray-100 animate-fade-in-up" style={{ animationDelay: '0.25s' }}>

@@ -12,7 +12,7 @@ interface AnalyticsData {
 }
 
 type Period = 3 | 6 | 12;
-type ActiveTab = 'overview' | 'trends' | 'reviews';
+type ActiveTab = 'trends' | 'reviews';
 
 // ─── SVG Bar Chart ────────────────────────────────────────────────────────────
 interface BarChartProps {
@@ -107,40 +107,9 @@ const BarChart: React.FC<BarChartProps> = ({ labels, datasets }) => {
     );
 };
 
-// ─── Stat Card ────────────────────────────────────────────────────────────────
-interface StatCardProps {
-    label: string;
-    value: number;
-    trend?: number; // percentage change
-    icon: string;
-    color: string;
-    bgColor: string;
-}
-
-const StatMiniCard: React.FC<StatCardProps> = ({ label, value, trend, icon, color, bgColor }) => (
-    <div className={`${bgColor} rounded-2xl p-5 flex flex-col gap-3 shadow-sm border border-black/5`}>
-        <div className="flex items-center justify-between">
-            <span className="text-2xl">{icon}</span>
-            {trend !== undefined && (
-                <span className={`text-xs font-bold px-2 py-1 rounded-full ${trend >= 0 ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
-                    {trend >= 0 ? '↑' : '↓'} {Math.abs(trend)}%
-                </span>
-            )}
-        </div>
-        <div>
-            <p className={`text-3xl font-bold ${color}`}>{value.toLocaleString()}</p>
-            <p className="text-sm text-gray-500 mt-0.5">{label}</p>
-        </div>
-    </div>
-);
-
 // ─── Main Component ───────────────────────────────────────────────────────────
-interface AdminStatsDashboardProps {
-    initialStats: any;
-}
-
-const AdminStatsDashboard: React.FC<AdminStatsDashboardProps> = ({ initialStats }) => {
-    const [activeTab, setActiveTab] = useState<ActiveTab>('overview');
+const AdminStatsDashboard: React.FC = () => {
+    const [activeTab, setActiveTab] = useState<ActiveTab>('trends');
     const [period, setPeriod] = useState<Period>(12);
     const [analytics, setAnalytics] = useState<AnalyticsData | null>(null);
     const [loadingAnalytics, setLoadingAnalytics] = useState(false);
@@ -165,19 +134,9 @@ const AdminStatsDashboard: React.FC<AdminStatsDashboardProps> = ({ initialStats 
     }, [period, activeTab, loadAnalytics]);
 
     const tabs: { key: ActiveTab; label: string; icon: string }[] = [
-        { key: 'overview', label: 'Overview', icon: '📊' },
         { key: 'trends', label: 'Trends', icon: '📈' },
         { key: 'reviews', label: 'Review Monitoring', icon: '💬' },
     ];
-
-    // Compute trend for stat cards (last month vs previous month)
-    const computeTrend = (arr: number[]): number => {
-        if (!arr || arr.length < 2) return 0;
-        const last = arr[arr.length - 1] ?? 0;
-        const prev = arr[arr.length - 2] ?? 0;
-        if (prev === 0) return last > 0 ? 100 : 0;
-        return Math.round(((last - prev) / prev) * 100);
-    };
 
     return (
         <div id="statistics" className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden animate-fade-in-up" style={{ animationDelay: '0.5s' }}>
@@ -231,92 +190,6 @@ const AdminStatsDashboard: React.FC<AdminStatsDashboardProps> = ({ initialStats 
             </div>
 
             <div className="p-6">
-                {/* ── OVERVIEW TAB ── */}
-                {activeTab === 'overview' && (
-                    <div className="space-y-6">
-                        {/* Stat mini cards */}
-                        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-                            <StatMiniCard
-                                label="Total Users"
-                                value={initialStats?.total_users ?? 0}
-                                trend={analytics ? computeTrend(analytics.users_per_month) : undefined}
-                                icon="👥"
-                                color="text-blue-600"
-                                bgColor="bg-blue-50"
-                            />
-                            <StatMiniCard
-                                label="Total Places"
-                                value={initialStats?.total_places ?? 0}
-                                trend={analytics ? computeTrend(analytics.places_per_month) : undefined}
-                                icon="🗺️"
-                                color="text-emerald-600"
-                                bgColor="bg-emerald-50"
-                            />
-                            <StatMiniCard
-                                label="Pending Review"
-                                value={initialStats?.pending_places ?? 0}
-                                icon="⏳"
-                                color="text-amber-600"
-                                bgColor="bg-amber-50"
-                            />
-                            <StatMiniCard
-                                label="Total Reviews"
-                                value={initialStats?.reviews_count ?? 0}
-                                trend={analytics ? computeTrend(analytics.reviews_per_month) : undefined}
-                                icon="⭐"
-                                color="text-purple-600"
-                                bgColor="bg-purple-50"
-                            />
-                        </div>
-
-                        {/* Top insights */}
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                            {/* Top Rated */}
-                            <div className="bg-gradient-to-br from-yellow-50 to-amber-50 rounded-xl p-5 border border-yellow-100">
-                                <div className="flex items-center gap-2 mb-3">
-                                    <span className="text-xl">🏆</span>
-                                    <h3 className="font-bold text-gray-700 text-sm">Top Rated Place</h3>
-                                </div>
-                                {initialStats?.top_rated ? (
-                                    <>
-                                        <p className="font-bold text-amber-700 text-lg leading-tight truncate">{initialStats.top_rated.name}</p>
-                                        <p className="text-xs text-gray-500 mt-1">
-                                            {Number(initialStats.top_rated.rating).toFixed(1)} ★ · {initialStats.top_rated.count} reviews
-                                        </p>
-                                    </>
-                                ) : <p className="text-gray-400 italic text-sm">No data yet</p>}
-                            </div>
-
-                            {/* Most Popular */}
-                            <div className="bg-gradient-to-br from-red-50 to-rose-50 rounded-xl p-5 border border-red-100">
-                                <div className="flex items-center gap-2 mb-3">
-                                    <span className="text-xl">❤️</span>
-                                    <h3 className="font-bold text-gray-700 text-sm">Most Favorited</h3>
-                                </div>
-                                {initialStats?.most_popular ? (
-                                    <>
-                                        <p className="font-bold text-red-700 text-lg leading-tight truncate">{initialStats.most_popular.name}</p>
-                                        <p className="text-xs text-gray-500 mt-1">{initialStats.most_popular.favorites} saves</p>
-                                    </>
-                                ) : <p className="text-gray-400 italic text-sm">No data yet</p>}
-                            </div>
-
-                            {/* Top Category */}
-                            <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl p-5 border border-blue-100">
-                                <div className="flex items-center gap-2 mb-3">
-                                    <span className="text-xl">📂</span>
-                                    <h3 className="font-bold text-gray-700 text-sm">Top Category</h3>
-                                </div>
-                                {initialStats?.top_category ? (
-                                    <>
-                                        <p className="font-bold text-blue-700 text-lg leading-tight truncate">{initialStats.top_category.name}</p>
-                                        <p className="text-xs text-gray-500 mt-1">{initialStats.top_category.count} places</p>
-                                    </>
-                                ) : <p className="text-gray-400 italic text-sm">No data yet</p>}
-                            </div>
-                        </div>
-                    </div>
-                )}
 
                 {/* ── TRENDS TAB ── */}
                 {activeTab === 'trends' && (
