@@ -114,6 +114,11 @@ export const placesService = {
         return response.data;
     },
 
+    async getAdminAnalytics(months: 3 | 6 | 12 = 12): Promise<any> {
+        const response = await api.get(`/admin/analytics?months=${months}`);
+        return response.data;
+    },
+
     async getPartnerDashboard(): Promise<any> {
         const response = await api.get('/partner/dashboard');
         return response.data;
