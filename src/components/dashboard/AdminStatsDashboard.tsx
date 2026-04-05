@@ -115,14 +115,16 @@ interface DonutChartProps {
 }
 
 const DonutChart: React.FC<DonutChartProps> = ({ data }) => {
-    const total = data.reduce((s, d) => s + d.total, 0);
+    const safeData = Array.isArray(data) ? data : (data ? Object.values(data) as { name: string; total: number }[] : []);
+    const total = safeData.reduce((s, d) => s + Number(d.total || 0), 0);
     if (total === 0) return <p className="text-center text-gray-400 italic text-sm py-8">No data available</p>;
 
     const cx = 90, cy = 90, r = 65, innerR = 42;
     let cumAngle = -Math.PI / 2;
 
-    const slices = data.slice(0, 8).map((d, i) => {
-        const angle = (d.total / total) * 2 * Math.PI;
+    const slices = safeData.slice(0, 8).map((d, i) => {
+        const itemTotal = Number(d.total || 0);
+        const angle = total > 0 ? (itemTotal / total) * 2 * Math.PI : 0;
         const startAngle = cumAngle;
         cumAngle += angle;
         const endAngle = cumAngle;
@@ -136,7 +138,7 @@ const DonutChart: React.FC<DonutChartProps> = ({ data }) => {
         const iy2 = cy + innerR * Math.sin(startAngle);
         const largeArc = angle > Math.PI ? 1 : 0;
         const path = `M${x1},${y1} A${r},${r} 0 ${largeArc},1 ${x2},${y2} L${ix1},${iy1} A${innerR},${innerR} 0 ${largeArc},0 ${ix2},${iy2} Z`;
-        return { path, color: DONUT_COLORS[i % DONUT_COLORS.length], name: d.name, total: d.total, pct: Math.round((d.total / total) * 100) };
+        return { path, color: DONUT_COLORS[i % DONUT_COLORS.length], name: d.name, total: itemTotal, pct: Math.round((itemTotal / total) * 100) };
     });
 
     return (
