@@ -5,6 +5,7 @@ import { placesService } from '../services/placesService';
 import type { Place } from '../models/Place.model';
 import AdminUsersTable from '../components/dashboard/AdminUsersTable';
 import AdminReviewsTable from '../components/dashboard/AdminReviewsTable';
+import AdminStatsDashboard from '../components/dashboard/AdminStatsDashboard';
 import Alert from '../components/common/Alert';
 import ConfirmationModal from '../components/common/ConfirmationModal';
 import { useLanguage } from '../context/LanguageContext';
@@ -360,6 +361,9 @@ const Dashboard: React.FC = () => {
                         </div>
 
                         <div className="grid grid-cols-1 lg:grid-cols-1 gap-8">
+                            {/* HU012 - Admin Statistics Dashboard */}
+                            <AdminStatsDashboard initialStats={stats} />
+
                             {/* Admin Partner Requests Management */}
                             <div className="bg-white rounded-xl shadow-sm overflow-hidden border border-gray-100 animate-fade-in-up" style={{ animationDelay: '0.25s' }}>
                                 <div className="p-6 border-b border-gray-100 bg-teal-50/50 flex justify-between items-center">
