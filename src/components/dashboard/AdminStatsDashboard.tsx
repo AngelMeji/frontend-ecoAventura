@@ -107,67 +107,6 @@ const BarChart: React.FC<BarChartProps> = ({ labels, datasets }) => {
     );
 };
 
-// ─── Donut Chart ──────────────────────────────────────────────────────────────
-const DONUT_COLORS = ['#10b981', '#3b82f6', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#06b6d4', '#84cc16'];
-
-interface DonutChartProps {
-    data: { name: string; total: number }[];
-}
-
-const DonutChart: React.FC<DonutChartProps> = ({ data }) => {
-    const safeData = Array.isArray(data) ? data : (data ? Object.values(data) as { name: string; total: number }[] : []);
-    const total = safeData.reduce((s, d) => s + Number(d.total || 0), 0);
-    if (total === 0) return <p className="text-center text-gray-400 italic text-sm py-8">No data available</p>;
-
-    const cx = 90, cy = 90, r = 65, innerR = 42;
-    let cumAngle = -Math.PI / 2;
-
-    const slices = safeData.slice(0, 8).map((d, i) => {
-        const itemTotal = Number(d.total || 0);
-        const angle = total > 0 ? (itemTotal / total) * 2 * Math.PI : 0;
-        const startAngle = cumAngle;
-        cumAngle += angle;
-        const endAngle = cumAngle;
-        const x1 = cx + r * Math.cos(startAngle);
-        const y1 = cy + r * Math.sin(startAngle);
-        const x2 = cx + r * Math.cos(endAngle);
-        const y2 = cy + r * Math.sin(endAngle);
-        const ix1 = cx + innerR * Math.cos(endAngle);
-        const iy1 = cy + innerR * Math.sin(endAngle);
-        const ix2 = cx + innerR * Math.cos(startAngle);
-        const iy2 = cy + innerR * Math.sin(startAngle);
-        const largeArc = angle > Math.PI ? 1 : 0;
-        const path = `M${x1},${y1} A${r},${r} 0 ${largeArc},1 ${x2},${y2} L${ix1},${iy1} A${innerR},${innerR} 0 ${largeArc},0 ${ix2},${iy2} Z`;
-        return { path, color: DONUT_COLORS[i % DONUT_COLORS.length], name: d.name, total: itemTotal, pct: Math.round((itemTotal / total) * 100) };
-    });
-
-    return (
-        <div className="flex flex-col md:flex-row items-center gap-6">
-            <svg viewBox="0 0 180 180" className="w-44 h-44 shrink-0">
-                {slices.map((s, i) => (
-                    <path key={i} d={s.path} fill={s.color} opacity={0.9}>
-                        <title>{`${s.name}: ${s.total} (${s.pct}%)`}</title>
-                    </path>
-                ))}
-                <text x={cx} y={cy - 6} textAnchor="middle" fontSize="11" fill="#555" fontWeight="bold">{total}</text>
-                <text x={cx} y={cy + 10} textAnchor="middle" fontSize="9" fill="#888">places</text>
-            </svg>
-            <div className="flex flex-col gap-2 flex-1 w-full">
-                {slices.map((s, i) => (
-                    <div key={i} className="flex items-center gap-2">
-                        <span className="w-3 h-3 rounded-full shrink-0" style={{ background: s.color }}></span>
-                        <span className="text-sm text-gray-700 flex-1 truncate">{s.name}</span>
-                        <span className="text-xs font-bold text-gray-500">{s.pct}%</span>
-                        <div className="w-16 bg-gray-100 rounded-full h-1.5">
-                            <div className="h-1.5 rounded-full" style={{ width: `${s.pct}%`, background: s.color }}></div>
-                        </div>
-                    </div>
-                ))}
-            </div>
-        </div>
-    );
-};
-
 // ─── Stat Card ────────────────────────────────────────────────────────────────
 interface StatCardProps {
     label: string;
@@ -375,27 +314,6 @@ const AdminStatsDashboard: React.FC<AdminStatsDashboardProps> = ({ initialStats 
                                     </>
                                 ) : <p className="text-gray-400 italic text-sm">No data yet</p>}
                             </div>
-                        </div>
-
-                        {/* Category Donut */}
-                        <div className="bg-gray-50 rounded-xl p-5 border border-gray-100">
-                            <h3 className="font-bold text-gray-700 mb-4 flex items-center gap-2">
-                                <svg className="w-4 h-4 text-violet-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z" />
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z" />
-                                </svg>
-                                Category Distribution (Approved Places)
-                            </h3>
-                            {loadingAnalytics ? (
-                                <div className="flex items-center justify-center py-8 gap-3 text-gray-400">
-                                    <div className="animate-spin w-5 h-5 border-2 border-violet-300 border-t-violet-600 rounded-full"></div>
-                                    Loading…
-                                </div>
-                            ) : analytics?.category_distribution ? (
-                                <DonutChart data={analytics.category_distribution} />
-                            ) : (
-                                <p className="text-center text-gray-400 italic text-sm py-4">No category data available</p>
-                            )}
                         </div>
                     </div>
                 )}
