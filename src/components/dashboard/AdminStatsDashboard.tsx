@@ -134,8 +134,8 @@ const AdminStatsDashboard: React.FC = () => {
     }, [period, activeTab, loadAnalytics]);
 
     const tabs: { key: ActiveTab; label: string; icon: string }[] = [
-        { key: 'trends', label: 'Trends', icon: '📈' },
-        { key: 'reviews', label: 'Review Monitoring', icon: '💬' },
+        { key: 'trends', label: 'Tendencias', icon: '📈' },
+        { key: 'reviews', label: 'Moderación de Reseñas', icon: '💬' },
     ];
 
     return (
@@ -147,9 +147,9 @@ const AdminStatsDashboard: React.FC = () => {
                         <svg className="w-5 h-5 text-violet-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                         </svg>
-                        Platform Statistics
+                        Estadísticas de la Plataforma
                     </h2>
-                    <p className="text-sm text-gray-500 mt-0.5">Analytics dashboard — HU012</p>
+                    <p className="text-sm text-gray-500 mt-0.5">Tablero de analítica — HU012</p>
                 </div>
                 {/* Period Filter */}
                 {activeTab !== 'reviews' && (
@@ -197,7 +197,7 @@ const AdminStatsDashboard: React.FC = () => {
                         {loadingAnalytics ? (
                             <div className="flex items-center justify-center py-16 gap-3 text-gray-400">
                                 <div className="animate-spin w-6 h-6 border-2 border-violet-300 border-t-violet-600 rounded-full"></div>
-                                Loading analytics…
+                                Cargando estadísticas…
                             </div>
                         ) : analytics ? (
                             <>
@@ -207,14 +207,14 @@ const AdminStatsDashboard: React.FC = () => {
                                         <svg className="w-4 h-4 text-violet-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z" />
                                         </svg>
-                                        Monthly Activity — Last {period} months
+                                        Actividad mensual — Últimos {period} meses
                                     </h3>
                                     <BarChart
-                                        labels={analytics.labels}
+                                        labels={analytics.labels.map(l => l.replace('Jan', 'Ene').replace('Apr', 'Abr').replace('Aug', 'Ago').replace('Dec', 'Dic'))}
                                         datasets={[
-                                            { label: 'New Users', data: analytics.users_per_month, color: '#2563eb', bgColor: '#bfdbfe' },
-                                            { label: 'New Reviews', data: analytics.reviews_per_month, color: '#7c3aed', bgColor: '#ddd6fe' },
-                                            { label: 'Approved Places', data: analytics.places_per_month, color: '#059669', bgColor: '#a7f3d0' },
+                                            { label: 'Nuevos Usuarios', data: analytics.users_per_month, color: '#2563eb', bgColor: '#bfdbfe' },
+                                            { label: 'Nuevas Reseñas', data: analytics.reviews_per_month, color: '#7c3aed', bgColor: '#ddd6fe' },
+                                            { label: 'Lugares Aprobados', data: analytics.places_per_month, color: '#059669', bgColor: '#a7f3d0' },
                                         ]}
                                     />
                                 </div>
@@ -222,20 +222,20 @@ const AdminStatsDashboard: React.FC = () => {
                                 {/* Summary stats for the period */}
                                 <div className="grid grid-cols-3 gap-4">
                                     {[
-                                        { label: 'New Users', total: analytics.users_per_month.reduce((a, b) => a + b, 0), color: 'text-blue-600', bg: 'bg-blue-50', icon: '👥' },
-                                        { label: 'New Reviews', total: analytics.reviews_per_month.reduce((a, b) => a + b, 0), color: 'text-purple-600', bg: 'bg-purple-50', icon: '⭐' },
-                                        { label: 'Places Approved', total: analytics.places_per_month.reduce((a, b) => a + b, 0), color: 'text-emerald-600', bg: 'bg-emerald-50', icon: '✅' },
+                                        { label: 'Nuevos Usuarios', total: analytics.users_per_month.reduce((a, b) => a + b, 0), color: 'text-blue-600', bg: 'bg-blue-50', icon: '👥' },
+                                        { label: 'Nuevas Reseñas', total: analytics.reviews_per_month.reduce((a, b) => a + b, 0), color: 'text-purple-600', bg: 'bg-purple-50', icon: '⭐' },
+                                        { label: 'Lugares Aprobados', total: analytics.places_per_month.reduce((a, b) => a + b, 0), color: 'text-emerald-600', bg: 'bg-emerald-50', icon: '✅' },
                                     ].map((item, i) => (
                                         <div key={i} className={`${item.bg} rounded-xl p-4 text-center border border-black/5`}>
                                             <p className="text-2xl mb-1">{item.icon}</p>
                                             <p className={`text-2xl font-bold ${item.color}`}>{item.total}</p>
-                                            <p className="text-xs text-gray-500 mt-0.5">{item.label} (last {period}M)</p>
+                                            <p className="text-xs text-gray-500 mt-0.5">{item.label} (últimos {period}M)</p>
                                         </div>
                                     ))}
                                 </div>
                             </>
                         ) : (
-                            <p className="text-center text-gray-400 italic py-12">Could not load trend data.</p>
+                            <p className="text-center text-gray-400 italic py-12">No se pudieron cargar los datos.</p>
                         )}
                     </div>
                 )}
